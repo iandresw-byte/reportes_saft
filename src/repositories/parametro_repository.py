@@ -1,0 +1,85 @@
+class ParametroRepository:
+    def __init__(self, conexion):
+        self.conexion = conexion
+
+    def obtener_parametros(self):
+        query = """
+        SELECT TOP (1)
+            CodMuni, NombreMuni, Version, NombreDepto, DiaProcesoCT, NumHabitantes,
+            TasaTerceraEdad, AnosTerceraEdad, DiaProcesoSP, TasaDescPagoAdela, DiaCierreSP,
+            DescMaxSP, DescMaxBI, CalculeFMTop, TipoConcertacion, FU_CalculoPesos,
+            FU_PorcAdEsq, CalculeFMParcela, FU_DescSegPiso, FU_DescTercPiso, ModoManejoFactSP,
+            BotonBanco, DosDigitos, MapaSURE, ManzaHaz, TipoConcertacionRural, MensualQuin,
+            dirfoto, MsgBI, MsgIC, MsgSP, MsgAviso, MsgPReq, MsgSReq, MapaSUREru, Email,
+            Telefono, Fax, Corte, CalcSP, MuniJunta, CalcOtrosIR, Fotos, Diagrama, PDFS, Encr, PorContri
+        FROM Parametro
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query)
+            row = cur.fetchone()
+            if not row:
+                return None
+
+            columns = [column[0] for column in cur.description]
+            return dict(zip(columns, row))
+
+    def obtener_systemParam(self):
+        query = """
+        SELECT 
+            CtaIngresoIP, CtaIngresoCJ, CtaIngresoPermOp, CtaIngresoDescuento, CtaIngresoVolVenta, CtaEgresoFondoPos, CtaEgresoFondoLen, CtaEgresoMask, CtaIngresoMask, CtaIngresoBiRural, CtaIngresoBiUrb, 
+            CtaIngresoMultaOPSinPermiso, CtaIngresoMultaDeclaraTarde, CtaIngresoRecargoImp, CtaIngresoRecargoServ, CtaIngresoIntImp, CtaIngresoIntServ, IBi, IIC, IIP, Sp, FechaAmni, FechaIC, FechaIP, FechaSP, DescAmni, Emer, 
+            FechaIEmer, FechaFEmer, MotivoEmer, DescEmerBI, MaskCtaIngreso, MaskCtaOP, MaskCtaRecu, TpoCuenta, Pp, FechaPp, FechaAmniI, FechaIcI, FechaIpI, FechaSpI, FechaPpI, IntRecPp, CtaInteresPP, CtaRecargoPP, 
+            PorDescAmni, FinAmni, PorDescAmniPP, DescAmniPP
+        FROM  SystemParam
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query)
+            row = cur.fetchone()
+            if not row:
+                return None
+
+            columns = [column[0] for column in cur.description]
+            return dict(zip(columns, row))
+
+    def obtener_parametros_cont(self):
+        query = """
+        SELECT 
+            FechaCierreAnual, MesActivoInicio, MesActivoFin, TipoNumPartidas, SeqPartidaActual, NombreEmpresa, RtnEmpresa, CtaResultadoPeriodo, CtaResultadoNeto, InicioSistema, NumPartidaActual, MesActivoInicioPres, 
+            MesActivoFinPres, CtaContableCaja, DiaProcesoTes, AfectaPresIng, AfectaPresEg, ReciboTes, UltNumCheque, UltNumOC, UltNumOP, MonedaNominal, NombreDepartamento, ModeloBalance, YearPresup, ModuloEnUso, 
+            ContaUpdateFromPresu, UltNumFact, UltNumRec, UltNumAbonado, Alcalde, Tesorero, Contabilidad, Administrador, Presupuesto, Auditor, Tributaria, Catastro, CtaCaja, CtaBanco, CopRec, UltNoCai, CodigoCai, FacRes, 
+            UltCat, Ambiental, Justicia, UltNumPO, FirmaPO_1, Secretaria, DesarrolloUrbano
+        FROM ParametroCont
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query)
+            row = cur.fetchone()
+            if not row:
+                return None
+
+            columns = [column[0] for column in cur.description]
+            return dict(zip(columns, row))
+
+    def actualizar_administrativo(self, data):
+        data.append(data[9])
+        query = """ UPDATE ParametroCont 
+       SET Alcalde = ?, Tesorero = ?, Contabilidad = ?, Administrador = ?, Presupuesto = ?, Tributaria = ?, Ambiental = ?, Justicia = ?, Auditor = ?, RtnEmpresa = ?, NombreEmpresa = ?, FirmaPO_1 =?
+       where RtnEmpresa = ?"""
+
+        with self.conexion.cursor() as cur:
+            cur.execute(query, data)
+            return True
+
+    def obtener_departamentos(self):
+        query = """SELECT IdDeptos, DeptoDesc FROM PLA_DEPARTAMENTOS
+            """
+        with self.conexion.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+            if not rows:
+                return []
+            columns = [column[0] for column in cur.description]
+
+            # Convertir cada fila en un diccionario
+            aldeas = [dict(zip(columns, row)) for row in rows]
+
+            return aldeas

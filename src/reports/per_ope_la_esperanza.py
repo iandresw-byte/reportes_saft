@@ -1,0 +1,449 @@
+import os
+import locale
+import json
+from pathlib import Path
+import qrcode
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.fonts import addMapping
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable, Image
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from src.models.tra_permop import Tra_PermOpe
+from src.ui.components.ui_style_table import estilos_parrafo
+
+
+def add_background(canvas, doc, image_path):
+    # Dimensiones de media carta en puntos (pulgadas * 72)
+    width, height = letter  # Página completa letter
+    half_height = height / 2  # Media carta, horizontalmente en vertical
+    canvas.drawImage(
+        image_path,
+        0, 0,  # origen en la parte superior
+        width=width,
+        height=458.64,
+        preserveAspectRatio=True,
+        mask='auto'
+    )
+
+
+for loc in ["es_ES", "Spanish", "es-ES", "es_HN", "es_ES.UTF-8"]:
+    try:
+        locale.setlocale(locale.LC_TIME, loc)
+        break
+    except locale.Error:
+        pass
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+# sube un nivel desde reports/
+
+FONTS_DIR = os.path.join(BASE_DIR, "assets", "fonts")
+# Rutas de fuentes
+
+font_Century_Gothic = os.path.join(FONTS_DIR, "Century-Gothic.ttf")
+font_arial_rounded_mt = os.path.join(
+    FONTS_DIR, "Arial-Rounded-MT-Bold-Bold.ttf")
+font_arial_unicode_ms = os.path.join(FONTS_DIR, "Arial-Unicode-MS-Regular.ttf")
+font_britannic_bold = os.path.join(FONTS_DIR, "Britannic-Bold-Bold.ttf")
+
+amasis_mt_md = os.path.join(FONTS_DIR, "amasis-mt-md.ttf")
+amasis_bold = os.path.join(FONTS_DIR, "Amasis-MT-Std-Bold.ttf")
+aharoni_bold = os.path.join(FONTS_DIR, "ahronbd.ttf")
+abadi = os.path.join(FONTS_DIR, "AbadiMTPro.ttf")
+abadi_bold = os.path.join(FONTS_DIR, "AbadiMTPro-Bold.ttf")
+if os.path.exists(amasis_mt_md):
+    pdfmetrics.registerFont(TTFont('AMASI', amasis_mt_md))
+    addMapping('AMASI', 0, 0, 'AMASI')
+    # Bold
+if os.path.exists(amasis_bold):
+    pdfmetrics.registerFont(TTFont("AMASIS-BOLD", amasis_bold))
+    addMapping("AMASIS", 1, 0, "AMASIS-BOLD")
+if os.path.exists(aharoni_bold):
+    pdfmetrics.registerFont(TTFont("AHARONI-BOLD", aharoni_bold))
+    addMapping("AHARONI", 1, 0, "AHARONI-BOLD")
+
+if os.path.exists(abadi_bold):
+    pdfmetrics.registerFont(TTFont("ABADI", abadi))
+    addMapping("ABADI", 0, 0, "ABADI")
+
+if os.path.exists(abadi_bold):
+    pdfmetrics.registerFont(TTFont("ABADI-BOLD", abadi_bold))
+    addMapping("ABADI", 1, 0, "ABADI-BOLD")
+    # Bold
+
+if os.path.exists(font_arial_rounded_mt):
+    pdfmetrics.registerFont(
+        TTFont('Arial-Rounded-MT-Bold', font_arial_rounded_mt))
+    addMapping('Arial-Rounded-MT', 1, 0, 'Arial-Rounded-MT-Bold')
+
+if os.path.exists(font_arial_unicode_ms):
+    pdfmetrics.registerFont(TTFont('Arial-Unicode-MS', font_arial_unicode_ms))
+    addMapping('Arial-Unicode', 0, 0, 'Arial-Unicode-MS')
+
+if os.path.exists(font_britannic_bold):
+    pdfmetrics.registerFont(TTFont('Britannic-Bold', font_britannic_bold))
+    addMapping('Britannic', 1, 0, 'Britannic-Bold')
+
+
+class PerOpeLaEsperanzaReport:
+    def __init__(self, datos: Tra_PermOpe, municipio, titulo_reporte, firma_justicia=False, municipio_admin=False, horario_alcohol=False):
+        self.datos = datos
+        self.municipio = municipio
+        self.titulo = titulo_reporte
+        self.justicia_firma = firma_justicia
+        self.muni_admin = municipio_admin
+        self.horario = horario_alcohol
+
+      # Media carta, horizontalmente en vertical
+
+    def generar_pdf(self, ruta_salida="mora_bi_report.pdf"):
+        width, height = letter  # Página completa letter
+        half_height = height / 2
+        doc = SimpleDocTemplate(ruta_salida, pagesize=(width, 458.64),
+                                leftMargin=30,
+                                rightMargin=30,
+                                topMargin=30,
+                                bottomMargin=0)
+        elementos = []
+        permiso_datos = json.dumps({
+            "permiso": self.datos.NumRecibo,
+            "nombre": self.datos.Negocio,
+            "fecha": self.datos.Fecha.strftime("%d/%m/%Y"),
+            "id": self.datos.Identidad,
+            "Propietario": self.datos.Propietario,
+            "Periodo": self.datos.Periodo
+        }, ensure_ascii=False)
+
+        qr_img = qrcode.make(permiso_datos)
+        buffer = BytesIO()
+        qr_img.save(buffer, format="PNG")
+        buffer.seek(0)
+
+        # crea Flowable Image para ReportLab
+        qr_flowable = Image(buffer, width=60, height=60)
+
+        estilos = estilos_parrafo()
+
+        municipalidad = Paragraph(
+            f"ALCALDIA MUNICIPAL DE LA ESPERANZA", estilos["la_esperanza_title"],)
+        titulo = Paragraph(
+            f"LA ESPERANZA, INTIBUCA HONDURAS C.A.", estilos["la_esperanza_title"],)
+        titulo_po = Paragraph(
+            f"PERMISO DE OPERACIÓN DE NEGOCIOS {self.datos.Periodo}", estilos["la_esperanza_title_ope"],)
+        telefonos = Paragraph(
+            f"TELEFONO: {self.municipio["Telefono"]}, {self.municipio["Fax"]}", estilos["la_esperanza_telefono"],)
+        if self.horario == '1':
+            titulo_dom_jue = [
+                Paragraph(f"<u>DE DOMINGO A JUEVES</u>",
+                          estilos["horario_title"],)
+            ]
+            titulo_vie_sab = [
+                Paragraph(f"<u>VIERNES A SÁBADO</u>",
+                          estilos["horario_title"],)
+            ]
+            titulo_festivo = [
+                Paragraph(f"<u>DIAS FESTIVOS</u>", estilos["horario_title"],)
+            ]
+            hora_dom_jue = [
+                Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
+            ]
+            hora_vie_sab = [
+                Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
+            ]
+            hora_festivo = [
+                Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
+            ]
+            ult_linea = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+        elif self.horario == '2':
+            titulo_dom_jue = [
+                Paragraph(f"ESTE NEGOCIO", estilos["horario_title"],)
+            ]
+            titulo_vie_sab = [
+                Paragraph(f"AUTORIZADO", estilos["horario_title"],)
+            ]
+            titulo_festivo = [
+                Paragraph(f"DE BEBIDAS", estilos["horario_title"],)
+            ]
+            hora_dom_jue = [
+                Paragraph(f"NO ESTA", estilos["horario"],),
+            ]
+            hora_vie_sab = [
+                Paragraph(f"PARA VENTA ", estilos["horario"],),
+            ]
+            hora_festivo = [
+                Paragraph(f"ALCOHOLICAS", estilos["horario"],),
+            ]
+            ult_linea = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+        else:
+            titulo_dom_jue = [
+                Paragraph(f"", estilos["horario_title"],)
+            ]
+            titulo_vie_sab = [
+                Paragraph(f"", estilos["horario_title"],)
+            ]
+            titulo_festivo = [
+                Paragraph(f"", estilos["horario_title"],)
+            ]
+            hora_dom_jue = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+            hora_vie_sab = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+            hora_festivo = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+            ult_linea = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+
+        tabla_horario = Table(
+            [
+                titulo_dom_jue,
+                hora_dom_jue,
+                titulo_vie_sab,
+                hora_vie_sab,
+                titulo_festivo,
+                hora_festivo,
+                ult_linea
+            ],
+            colWidths=[110]
+        )
+
+# TABLA PROPIETARIO
+        fila_negocio = [
+            Paragraph(f"NOMBRE DEL NEGOCIO:", estilos["la_esperanza_campos"],),
+            Paragraph(f"{self.datos.Negocio}",
+                      estilos["la_esperanza_campos"],),
+        ]
+        fila_rtn = [
+            Paragraph(f"RTN:", estilos["la_esperanza_campos"],),
+            Paragraph(f"{self.datos.rtn}", estilos["la_esperanza_campos"]),
+        ]
+        fila_propitario = [
+            Paragraph(f"PROPIETARIO:", estilos["la_esperanza_campos"],),
+            Paragraph(f"{self.datos.Propietario}",
+                      estilos["la_esperanza_campos"]),
+        ]
+        fila_ubicacion = [
+            Paragraph(f"UBICACION:", estilos["la_esperanza_campos"],),
+            Paragraph(f"{self.datos.Direccion}",
+                      estilos["la_esperanza_campos"],),
+        ]
+        fila_actividad = [
+            Paragraph(f"<b>ACTIVIDAD PRINCIPAL: </b>",
+                      estilos["la_esperanza_campos"],),
+            Paragraph(f"{self.datos.Actividad}",
+                      estilos["la_esperanza_campos"],),
+        ]
+
+        fila_footer = [
+            Paragraph(
+                f"(Vence el 31 de diciembre del {self.datos.Periodo})", estilos["la_esperanza_parrafo"]),
+            Paragraph(""),
+            Paragraph(f"NO NEGOCIABLE", estilos["la_esperanza_parrafo"]),
+            Paragraph(""),
+            Paragraph(f"<b>NOTA:</b> Sin firma y sin sello no es valido.",
+                      estilos["la_esperanza_parrafo"]),
+        ]
+
+# TABLA NEGOCIO
+
+        tabla_datos = Table(
+            [fila_negocio, fila_rtn, fila_propitario,
+                fila_ubicacion, fila_actividad],
+            colWidths=[160,  240]
+        )
+        footer = Table(
+            [fila_footer],
+            colWidths=[200, 20, 100, 20, 200]
+        )
+        estilo = TableStyle([
+            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            # Fondo gris para valores
+            ("BACKGROUND", (0, 0), (0, -1), colors.transparent),
+            ("BACKGROUND", (1, 0), (1, -1), colors.transparent),
+        ])
+        tabla_datos.setStyle(estilo)
+        tabla_horario.setStyle(
+            TableStyle([
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("BOX", (0, 0), (-1, -1), 1, colors.red),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("BACKGROUND", (0, 0), (-1, -1), colors.transparent),
+            ])
+        )
+
+        ahora = self.datos.Fecha
+        dia = ahora.day
+        mes = ahora.strftime("%B")
+        anio = ahora.year
+        fila_alcol = [tabla_horario]
+        fila_qr = [qr_flowable]
+        if self.horario != '0':
+            tabla_alcohol_qr = Table([fila_alcol, fila_qr],
+                                     colWidths=[130])
+        else:
+            tabla_alcohol_qr = Table([fila_qr],
+                                     colWidths=[130])
+        tabla_alcohol_qr.setStyle(
+            TableStyle([
+
+                ("ALIGN",  (0, 0), (-1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+
+            ])
+        )
+
+        fila = [tabla_datos, tabla_alcohol_qr]
+
+        tabla = Table(
+            [fila,],
+            colWidths=[400, 120]
+        )
+        tabla.setStyle(
+            TableStyle([
+                ("ALIGN", (0, 0), (0, -1), "LEFT"),
+                ("ALIGN",  (1, 0), (1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+
+            ])
+        )
+
+# TEXTOS
+        texto1 = Paragraph(
+            f"<b>De acuerdo al artículo N.124</b> del reglamento de la ley de Municipalidades, para la apertura y operación de establecimientos comerciales en este Municipio, el suscrito Alcalde Municipal concede el presente permiso el cual deberá ser colocado en un sitio visible. Dado en la ciudad de la Esperanza, Departamento de Intibucá, a los {dia} días del mes de {mes} del año {anio}. ", estilos["la_esperanza_parrafo"])
+
+# TABLA QR
+        num_permiso = Paragraph(
+            f"{self.datos.NoPermiso:04d}", estilos["la_esperanza_num_ope"])
+
+
+# TABLA FIRMA
+        if self.justicia_firma == "0":
+            valores_fila = [
+                Paragraph("",),
+                Paragraph(f"{self.muni_admin["Alcalde"]}",
+                          estilos["la_esperanza_campos_firma"]),
+                Paragraph("",),
+                Paragraph(f"{self.muni_admin["Tesorero"]}",
+                          estilos["la_esperanza_campos_firma"]),
+                Paragraph("",),
+            ]
+            valores_fila_1 = [
+                Paragraph("",),
+                Paragraph("ALCALDE MUNICIPAL",
+                          estilos["la_esperanza_campos_firma"]),
+                Paragraph("",),
+                Paragraph("TESORERA MUNICIPAL",
+                          estilos["la_esperanza_campos_firma"]),
+                Paragraph("",),
+            ]
+            tabla_firma = Table(
+                [valores_fila, valores_fila_1],
+                colWidths=[20, 150, 40, 150, 20],  # ajusta según tus márgenes
+            )
+            tabla_firma.setStyle(TableStyle([
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                # línea encima de la celda central
+                ("LINEABOVE", (1, 0), (1, 0), 1, "black"),
+                ("LINEABOVE", (3, 0), (3, 0), 1, "black"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ]))
+        else:
+            if self.justicia_firma == "1":
+                label = "JUSTICIA MUNICIPAL"
+                valor_firma = self.muni_admin["Justicia"]
+            else:
+                label = "UNIDAD AMBIENTAL"
+                valor_firma = self.muni_admin["Ambiental"]
+            valores_fila = [
+                Paragraph(f"{self.muni_admin["Alcalde"]}",
+                          estilos["la_esperanza_campos_firma"]),
+                Paragraph(""),
+                Paragraph(valor_firma, estilos["la_esperanza_campos_firma"]),
+                Paragraph(""),
+                Paragraph(f"{self.muni_admin["Tesorero"]}",
+                          estilos["la_esperanza_campos_firma"]),
+            ]
+            valores_fila_1 = [
+                Paragraph("ALCALDE MUNICIPAL",
+                          estilos["la_esperanza_campos_firma"]),
+                Paragraph(""),
+                Paragraph(label,
+                          estilos["la_esperanza_campos_firma"]),
+                Paragraph(""),
+                Paragraph("TESORERA MUNICIPAL",
+                          estilos["la_esperanza_campos_firma"]),
+            ]
+
+            tabla_firma = Table(
+                [valores_fila, valores_fila_1],
+                colWidths=[150, 20, 150, 20, 150],  # ajusta según tus márgenes
+            )
+            tabla_firma.setStyle(TableStyle([
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                # línea encima de Justicia Municipal
+                ("LINEABOVE", (0, 0), (0, 0), 1, "black"),
+                ("LINEABOVE", (2, 0), (2, 0), 1, "black"),
+                ("LINEABOVE", (4, 0), (4, 0), 1, "black"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ]))
+
+        elementos.append(num_permiso)
+        elementos.append(municipalidad)
+
+        elementos.append(titulo)
+        elementos.append(telefonos)
+        elementos.append(titulo_po)
+
+        linea = HRFlowable(width="80%", thickness=1,
+                           color=colors.black, spaceBefore=10, spaceAfter=10)
+        # elementos.append(linea)
+        elementos.append(Spacer(1, 10))
+        # elementos.append(tabla_datos)
+        elementos.append(tabla)
+        elementos.append(texto1)
+
+        elementos.append(footer)
+        elementos.append(Spacer(1, 40))
+        elementos.append(tabla_firma)
+        background_image = os.path.join(
+            BASE_DIR, "..", "assets", "images/per_ope_la_esperanza.jpg")
+        doc.build(elementos,
+                  onFirstPage=lambda canvas, doc: add_background(
+                      canvas, doc, background_image),
+                  onLaterPages=lambda canvas, doc: add_background(
+                      canvas, doc, background_image),
+                  )

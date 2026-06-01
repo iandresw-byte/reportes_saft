@@ -1,0 +1,45 @@
+class AldeaRepository:
+    def __init__(self, conexion):
+        self.conexion = conexion
+
+    def obtener_aldea_urbana(self):
+        query = "SELECT  MIN(CodAldea) AS CodAldea FROM Aldea"
+        with self.conexion.cursor() as cur:
+            cur.execute(query)
+            row = cur.fetchone()
+            if not row:
+                return None
+
+            columns = [column[0] for column in cur.description]
+            return dict(zip(columns, row))
+
+    def obtener_aldeas(self):
+        query = "SELECT CodAldea, NombreAldea, UbicacionAldea FROM Aldea"
+
+        with self.conexion.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            if not rows:
+                return []
+
+            columns = [column[0] for column in cur.description]
+
+            # Convertir cada fila en un diccionario
+            aldeas = [dict(zip(columns, row)) for row in rows]
+
+            return aldeas
+
+    def obtener_barrios(self, cod_aldea):
+        query = "SELECT CodBarrio, NombreBarrio, CodAldea FROM TablaBarrio WHERE CodAldea like ?"
+        with self.conexion.cursor() as cur:
+            cur.execute(query, (cod_aldea,))
+            rows = cur.fetchall()
+            if not rows:
+                return []
+            columns = [column[0] for column in cur.description]
+
+            # Convertir cada fila en un diccionario
+            aldeas = [dict(zip(columns, row)) for row in rows]
+
+            return aldeas
