@@ -84,7 +84,7 @@ class ConstanciasService:
                         "no_licencia": num_licencia,
                         "periodo": periodo,
                     })
-                self.insertar_licencia_uma_ics(licencia)
+            self.insertar_licencia_uma_ics(licencia)
 
         return licencia
 

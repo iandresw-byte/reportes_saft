@@ -65,7 +65,32 @@ class IngresosDeptosRepository:
                     PLA_DEPARTAMENTOS ON Usuario.CodDepto = PLA_DEPARTAMENTOS.IdDeptos INNER JOIN
                     F_01 ON Usuario.UsuarioCod = F_01.CreadoPor ON F_04.NumFactura = F_01.NumAvPg INNER JOIN
                     FC_03 ON F_03.DNI = FC_03.DNI
-                    WHERE        (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN ? AND ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) AND (F_01.AvPgTipoImpuesto in (0))
+                    WHERE        (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN ? AND ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) AND (F_01.AvPgTipoImpuesto = 0)
+                    GROUP BY F_03.FechaRecibo, F_03.NumRecibo, F_03.DNI, FC_03.Pnombre, FC_03.SNombre, FC_03.PApellido, FC_03.SApellido
+                    """
+        with self.conexion.cursor() as cur:
+            cur.execute(query, (fecha_ini,  fecha_fin,))
+            rows = cur.fetchall()
+            if not rows:
+                return None
+            columns = [c[0] for c in cur.description]
+            return [dict(zip(columns, r)) for r in rows]
+
+    def obtener_diario_ics_abonos(self, fecha_ini: str, fecha_fin: str):
+        query = """SELECT F_03.FechaRecibo, F_03.NumRecibo, F_03.DNI, FC_03.Pnombre, FC_03.SNombre, FC_03.PApellido, FC_03.SApellido, 
+                    CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 8) = '12599022' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT)  AS Constancias, 
+                    CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 3) = '117' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS Impuestos,
+                    CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 7) = '1521902' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS Servicios,
+                    CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 8) = '125990221' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS Certificaciones, 
+                    CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 6) = '152190101' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS Documentacion, 
+                    CAST(SUM(F_04.ValorUnitReciboDet) AS FLOAT) AS TotalReciboPagado
+                    FROM  F_03 INNER JOIN
+                    F_04 ON F_03.NumRecibo = F_04.NumRecibo INNER JOIN
+                    Usuario INNER JOIN
+                    PLA_DEPARTAMENTOS ON Usuario.CodDepto = PLA_DEPARTAMENTOS.IdDeptos INNER JOIN
+                    F_01 ON Usuario.UsuarioCod = F_01.CreadoPor ON F_04.NumFactura = F_01.NumAvPg INNER JOIN
+                    FC_03 ON F_03.DNI = FC_03.DNI
+                    WHERE        (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN ? AND ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) AND (F_01.AvPgTipoImpuesto = 8)
                     GROUP BY F_03.FechaRecibo, F_03.NumRecibo, F_03.DNI, FC_03.Pnombre, FC_03.SNombre, FC_03.PApellido, FC_03.SApellido
                     """
         with self.conexion.cursor() as cur:
@@ -95,8 +120,7 @@ class IngresosDeptosRepository:
                     PLA_DEPARTAMENTOS ON Usuario.CodDepto = PLA_DEPARTAMENTOS.IdDeptos INNER JOIN
                     F_01 ON Usuario.UsuarioCod = F_01.CreadoPor ON F_04.NumFactura = F_01.NumAvPg INNER JOIN
                     FC_03 ON F_03.DNI = FC_03.DNI
-                    WHERE        (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN ? AND ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) and f_01.AvPgTipoImpuesto in (1,8)
-                     and F_01.ClaveCatastro <> ''
+                    WHERE        (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN ? AND ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) and f_01.AvPgTipoImpuesto = 1
                     GROUP BY F_03.FechaRecibo, F_03.NumRecibo, F_03.DNI, FC_03.Pnombre, FC_03.SNombre, FC_03.PApellido, FC_03.SApellido,  F_01.ClaveCatastro
                     ORDER BY F_03.NumRecibo"""
         with self.conexion.cursor() as cur:
@@ -130,8 +154,7 @@ class IngresosDeptosRepository:
                 F_01 ON Usuario.UsuarioCod = F_01.CreadoPor ON F_04.NumFactura = F_01.NumAvPg INNER JOIN
                 FC_03 ON F_03.DNI = FC_03.DNI INNER JOIN
                 CuentaIngreso_A ON FC_03.CodProfesion = CuentaIngreso_A.CtaIngreso AND FC_03.UltPeriodoFact = CuentaIngreso_A.Anio
-                WHERE        (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN ? AND ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) AND (F_01.AvPgTipoImpuesto in (2,3,8))
-                and F_01.ClaveCatastro = '' and (FC_03.Tipo = 1)
+                WHERE        (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN ? AND ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) AND (F_01.AvPgTipoImpuesto in (2,3))
                 GROUP BY F_03.FechaRecibo, F_03.NumRecibo, F_03.DNI, FC_03.Pnombre, CuentaIngreso_A.NombreCtaIngreso
                 ORDER BY F_03.NumRecibo
             """
@@ -160,8 +183,7 @@ class IngresosDeptosRepository:
                 PLA_DEPARTAMENTOS ON Usuario.CodDepto = PLA_DEPARTAMENTOS.IdDeptos INNER JOIN
                 F_01 ON Usuario.UsuarioCod = F_01.CreadoPor ON F_04.NumFactura = F_01.NumAvPg INNER JOIN
                 FC_03 ON F_03.DNI = FC_03.DNI
-                WHERE        (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN ? AND ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) AND (F_01.AvPgTipoImpuesto in (4,8))
-                AND F_01.ClaveCatastro = '' AND (FC_03.Tipo = 0)
+                WHERE        (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN ? AND ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) AND (F_01.AvPgTipoImpuesto = 4)
                 GROUP BY F_03.FechaRecibo, F_03.NumRecibo, F_03.DNI, FC_03.Pnombre, FC_03.SNombre, FC_03.PApellido, FC_03.SApellido
             """
         with self.conexion.cursor() as cur:
@@ -295,53 +317,6 @@ class IngresosDeptosRepository:
                     GROUP BY F_03.FechaRecibo, F_03.NumRecibo, F_03.DNI, FC_03.Pnombre, FC_03.SNombre, FC_03.PApellido, FC_03.SApellido
                     ORDER BY F_03.NumRecibo
                 """
-        with self.conexion.cursor() as cur:
-            cur.execute(query, (fecha_ini,  fecha_fin,))
-            rows = cur.fetchall()
-            if not rows:
-                return None
-            columns = [c[0] for c in cur.description]
-            return [dict(zip(columns, r)) for r in rows]
-
-    def obtener_semanal_uma(self, fecha_ini: datetime.date, fecha_fin: datetime.date):
-        query = """
-                    SELECT F_03.FechaRecibo, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 9) = '125990241' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS LicenciasExtranccion, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 
-                    1, 8) = '11740106' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS BosquesDerivados, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 9) = '125990105' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) 
-                    AS TasaAmbiental, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 9) = '125990258' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS MatriculaMotoSierra, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 
-                    9) = '125990242' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS PerforacionPozos, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 9) = '125990220' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) 
-                    AS Constancias, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 9) = '125990207' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS Inspeccion, SUM(F_04.ValorUnitReciboDet) AS TotalReciboPagado
-                    FROM F_03 INNER JOIN
-                    F_04 ON F_03.NumRecibo = F_04.NumRecibo INNER JOIN
-                    Usuario INNER JOIN
-                    PLA_DEPARTAMENTOS ON Usuario.CodDepto = PLA_DEPARTAMENTOS.IdDeptos INNER JOIN
-                    F_01 ON Usuario.UsuarioCod = F_01.CreadoPor ON F_04.NumFactura = F_01.NumAvPg
-                    WHERE (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN ? AND ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 3)
-                    GROUP BY F_03.FechaRecibo
-
-                    """
-        with self.conexion.cursor() as cur:
-            cur.execute(query, (fecha_ini,  fecha_fin,))
-            rows = cur.fetchall()
-            if not rows:
-                return None
-            columns = [c[0] for c in cur.description]
-            return [dict(zip(columns, r)) for r in rows]
-
-    def obtener_mensual_uma(self, fecha_ini: datetime.date, fecha_fin: datetime.date):
-        query = """SELECT MONTH(F_03.FechaRecibo) AS Mes, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 9) = '125990241' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS LicenciasExtranccion, 
-                    CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 8) = '11740106' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS BosquesDerivados, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 9) 
-                    = '125990105' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS TasaAmbiental, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 9) = '125990258' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) 
-                    AS MatriculaMotoSierra, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 9) = '125990242' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS PerforacionPozos, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 
-                    1, 9) = '125990220' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS Constancias, CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 9) = '125990207' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) 
-                    AS Inspeccion, SUM(F_04.ValorUnitReciboDet) AS TotalReciboPagado
-                    FROM F_03 INNER JOIN
-                    F_04 ON F_03.NumRecibo = F_04.NumRecibo INNER JOIN
-                    Usuario INNER JOIN
-                    PLA_DEPARTAMENTOS ON Usuario.CodDepto = PLA_DEPARTAMENTOS.IdDeptos INNER JOIN
-                    F_01 ON Usuario.UsuarioCod = F_01.CreadoPor ON F_04.NumFactura = F_01.NumAvPg
-                    WHERE (F_03.ReciboAnulado = 0) AND (F_03.FechaRecibo BETWEEN '01-04-2026' AND '30-04-2026') AND (PLA_DEPARTAMENTOS.IdDeptos = 3)
-                    GROUP BY MONTH(F_03.FechaRecibo)
-                    """
         with self.conexion.cursor() as cur:
             cur.execute(query, (fecha_ini,  fecha_fin,))
             rows = cur.fetchall()

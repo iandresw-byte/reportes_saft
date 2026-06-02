@@ -3,6 +3,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
+from src.reports.tablas.ingresos_detallados_admin_tributaria_ab import tabla_ingreso_detallado_admin_tributaria_ab
 from src.reports.tablas.ingresos_detallados_justicia_municipal import tabla_ingreso_detallado_justicia
 from src.reports.tablas.ingresos_detallados_procamut import tabla_ingreso_detallado_procamut
 from src.reports.tablas.ingresosd_detallados_desarrollo_urbano import tabla_ingreso_detallado_desarrollo_urbano
@@ -83,6 +84,12 @@ class RptIngresosDeptoDetalladoReport:
                     self.administracion["Tributaria"], "Jefe del Departamento de Administracion Tributaria", None)
             elif self.tipo_factura == "4":
                 tabla = tabla_ingreso_detallado_admin_tributaria_ip(
+                    self.datos)
+                elementos.append(tabla)
+                tabla_firma = tabla_frima_pdf_unica(
+                    self.administracion["Tributaria"], "Jefe del Departamento de Administracion Tributaria", None)
+            elif self.tipo_factura == "8":
+                tabla = tabla_ingreso_detallado_admin_tributaria_ab(
                     self.datos)
                 elementos.append(tabla)
                 tabla_firma = tabla_frima_pdf_unica(

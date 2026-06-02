@@ -1,5 +1,5 @@
 import flet as ft
-from src.app_2 import app
+from src.app import app
 
 
 if __name__ == "__main__":

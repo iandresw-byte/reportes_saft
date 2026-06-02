@@ -491,6 +491,12 @@ async def generar_reporte_pdf_ingreso_depto_detallado(vista, e):
                 fecha_fin=fecha_fin, fecha_ini=fecha_ini)
             nombre_archivo = "ingreso_depto_detallado_tributaria_ip.pdf"
 
+        elif tipo_impuesto == "8":
+            titulo_rpt = "REPORTE DIARIO DE INGRESOS DEL DEPARTAMENTO DE ADMINISTRACION TRIBUTARIA - ABONOS A FACTURA"
+            fun_obtener = vista.ingresos_deptos.ingresos_diarios_tributaria_abonos(
+                fecha_fin=fecha_fin, fecha_ini=fecha_ini)
+            nombre_archivo = "ingreso_depto_detallado_tributaria_ab.pdf"
+
         else:
             return
     elif cod_depto == "3":
@@ -591,6 +597,15 @@ async def generar_reporte_excel_ingreso_depto_detallado(vista, e):
                 datos, vista.datos_muni, titulo_rpt, fecha_ini=fecha_ini, fecha_fin=fecha_fin, tipo_impuesto=tipo_impuesto
             )
             nombre_archivo = "ingreso_depto_detallado_tributaria_ip.xlsx"
+        elif tipo_impuesto == "8":
+            titulo_rpt = "REPORTE DIARIO DE INGRESOS DEL DEPARTAMENTO DE ADMINISTRACION TRIBUTARIA - ABONOS A FACTURAS"
+            fun_obtener = vista.ingresos_deptos.ingresos_diarios_tributaria_abonos(
+                fecha_fin=fecha_fin, fecha_ini=fecha_ini)
+
+            def reporte_excel(datos): return IngresosDeptosDetalladosTributariaReport(
+                datos, vista.datos_muni, titulo_rpt, fecha_ini=fecha_ini, fecha_fin=fecha_fin, tipo_impuesto=tipo_impuesto
+            )
+            nombre_archivo = "ingreso_depto_detallado_tributaria_ab.xlsx"
         else:
             return None
     elif cod_depto == "3":
@@ -710,6 +725,13 @@ async def generar_reporte_excel_ingreso_depto_diario(vista, e):
                 fecha_fin=fecha_fin, fecha_ini=fecha_ini)
 
             nombre_archivo = "ingreso_depto_diario_tributaria_ip.xlsx"
+        elif tipo_impuesto == "8":
+            titulo_rpt = "REPORTE DIARIO DE INGRESOS DEL DEPARTAMENTO DE ADMINISTRACION TRIBUTARIA - ABONOS A FACTURAS"
+            fun_obtener = vista.ingresos_deptos_diario.ingresos_diarios_tributaria_abonos(
+                fecha_fin=fecha_fin, fecha_ini=fecha_ini)
+
+            nombre_archivo = "ingreso_depto_diario_tributaria_ab.xlsx"
+
         else:
             return None
     elif cod_depto == "3":
@@ -809,6 +831,11 @@ async def generar_reporte_pdf_ingreso_depto_diario(vista, e):
             fun_obtener = vista.ingresos_deptos_diario.ingresos_diarios_tributaria_personal(
                 fecha_fin=fecha_fin, fecha_ini=fecha_ini)
             nombre_archivo = "ingreso_depto_diario_tributaria_ip.pdf"
+        elif tipo_impuesto == "8":
+            titulo_rpt = "REPORTE DIARIO DE INGRESOS DEL DEPARTAMENTO DE ADMINISTRACION TRIBUTARIA - ABONOS A FACTURAS"
+            fun_obtener = vista.ingresos_deptos_diario.ingresos_diarios_tributaria_abonos(
+                fecha_fin=fecha_fin, fecha_ini=fecha_ini)
+            nombre_archivo = "ingreso_depto_diario_tributaria_ab.pdf"
 
         else:
             return
@@ -887,6 +914,11 @@ async def generar_reporte_pdf_ingreso_depto_mensual(vista, e):
         elif tipo_impuesto == "4":
             titulo_rpt = "REPORTE DIARIO DE INGRESOS DEL DEPARTAMENTO DE ADMINISTRACION TRIBUTARIA - IMPUESTO PERSONAL"
             fun_obtener = vista.ingresos_deptos_mensual.ingresos_mensual_tributaria_personal(
+                anio=anio)
+            nombre_archivo = "ingreso_depto_mensual_tributaria_ip.pdf"
+        elif tipo_impuesto == "8":
+            titulo_rpt = "REPORTE DIARIO DE INGRESOS DEL DEPARTAMENTO DE ADMINISTRACION TRIBUTARIA - ABONOS A FACTURAS"
+            fun_obtener = vista.ingresos_deptos_mensual.ingresos_mensual_tributaria_abonos(
                 anio=anio)
             nombre_archivo = "ingreso_depto_mensual_tributaria_ip.pdf"
 

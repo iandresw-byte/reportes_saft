@@ -18,6 +18,7 @@ def rd_tipo_factura(tipo_impuesto, mostrar_todos=True) -> RadioGroup:
         create_radio(value="1", label_text="Bienes Inmuebles"),
         create_radio(value="4", label_text="Impuesto Personal"),
         create_radio(value="2,3", label_text="Industria, Comercio y Servicio"),
+        create_radio(value="8", label_text="Abonos a Facturas"),
 
     ]
 

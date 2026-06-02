@@ -107,6 +107,53 @@ def sumar_ingresos_depto_mensual_admin_tributaria_os(datos: DataFrame):
     return nuevo_df
 
 
+def sumar_ingresos_depto_mensual_admin_tributaria_ab(datos: DataFrame):
+    datos = mapear_mes(datos)
+    datos["Total_Resultado"] = datos[[
+        "Constancias",
+        "Impuestos",
+        "Servicios",
+        "Certificaciones",
+        "Documentacion",
+    ]].sum(axis=1)
+
+    datos["Otros"] = datos["TotalReciboPagado"].fillna(
+        0) - datos["Total_Resultado"].fillna(0)
+
+    fila_total = {"MesNombre": "Total",
+                  "Constancias": datos["Constancias"].sum(),
+                  "Impuestos": datos["Impuestos"].sum(),
+                  "Servicios": datos["Servicios"].sum(),
+                  "Certificaciones": datos["Certificaciones"].sum(),
+                  "Documentacion": datos["Documentacion"].sum(),
+                  "TotalReciboPagado": datos["TotalReciboPagado"].sum(),
+                  "Total_Resultado": datos["Total_Resultado"].sum(),
+                  "Otros": datos["Otros"].sum(),
+                  }
+
+    # Agregar fila al DataFrame
+    datos.loc[len(datos)] = fila_total
+    nuevo_df = datos[["MesNombre",
+                      "Constancias",
+                      "Impuestos",
+                      "Servicios",
+                      "Certificaciones",
+                      "Documentacion",
+                      "Otros",
+                      "TotalReciboPagado",
+                      ]]
+    nuevo_df.columns = ["Mes",
+                        "Constancias",
+                        "Impuestos",
+                        "Servicios",
+                        "Certificaciones",
+                        "Documentacion",
+                        "Otros",
+                        "Total",
+                        ]
+    return nuevo_df
+
+
 def sumar_ingresos_depto_mensual_admin_tributaria_bi(datos: DataFrame):
     datos = mapear_mes(datos)
     datos["Total_Resultado"] = datos[[

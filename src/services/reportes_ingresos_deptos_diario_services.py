@@ -43,6 +43,23 @@ class RptIngresosDeptosDiarioService:
                 "No se Encontraron Ingresos Diarios Detallados Pago de Otras Tasas  (DataFrame vacío).")
         return df
 
+    def ingresos_diarios_tributaria_abonos(self,  fecha_ini, fecha_fin):
+        data_res = self.repo_ingresos.obtener_diario_ics_ab(
+            fecha_ini=fecha_ini, fecha_fin=fecha_fin)
+
+        if not data_res:
+            raise ValueError(
+                "No se Encontraron Ingresos Diarios Detallados Pago de Abonos (respuesta vacía).")
+        try:
+            df = pd.DataFrame(data_res)
+        except Exception as e:
+            raise ValueError(
+                f"No se pudo convertir a DataFrame: (Ingresos Diarios Pago de Abonos) {e}")
+        if df.empty:
+            raise ValueError(
+                "No se Encontraron Ingresos Diarios Detallados Pago de Abonos  (DataFrame vacío).")
+        return df
+
     def ingresos_diarios_tributaria_inmuebles(self,  fecha_ini, fecha_fin):
         data_res = self.repo_ingresos.obtener_diario_ics_bienes(
             fecha_ini=fecha_ini, fecha_fin=fecha_fin)

@@ -135,6 +135,69 @@ def sumar_ingresos_departo_admin_tributaria_os(datos: DataFrame):
     return nuevo_df
 
 
+def sumar_ingresos_departo_admin_tributaria_ab(datos: DataFrame):
+    datos["Total_Resultado"] = datos[[
+        "Constancias",
+        "Impuestos",
+        "Servicios",
+        "Certificaciones",
+        "Documentacion",
+    ]].sum(axis=1)
+
+    datos["Otros"] = datos["TotalReciboPagado"].fillna(
+        0) - datos["Total_Resultado"].fillna(0)
+    datos["Nombre_Completo"] = (
+        datos["Pnombre"].fillna('') + ' ' +
+        datos["SNombre"].fillna('') + ' ' +
+        datos["PApellido"].fillna('') + ' ' +
+        datos["SApellido"].fillna('')
+    ).str.replace(r'\s+', ' ', regex=True).str.strip()
+    fila_total = {"FechaRecibo": "",
+                  "NumRecibo": "",
+                  "DNI": "",
+                  "Pnombre": "",
+                  "SNombre": "",
+                  "PApellido": "",
+                  "SApellido": "",
+                  "ClaveCatastro": "",
+                  "Constancias": datos["Constancias"].sum(),
+                  "Impuestos": datos["Impuestos"].sum(),
+                  "Servicios": datos["Servicios"].sum(),
+                  "Certificaciones": datos["Certificaciones"].sum(),
+                  "Documentacion": datos["Documentacion"].sum(),
+                  "TotalReciboPagado": datos["TotalReciboPagado"].sum(),
+                  "Total_Resultado": datos["Total_Resultado"].sum(),
+                  "Otros": datos["Otros"].sum(),
+                  "Nombre_Completo": "Total",
+                  }
+
+    # Agregar fila al DataFrame
+    datos.loc[len(datos)] = fila_total
+    nuevo_df = datos[["NumRecibo",
+                      "DNI",
+                      "Nombre_Completo",
+                      "Impuestos",
+                      "Servicios",
+                      "Constancias",
+                      "Certificaciones",
+                      "Documentacion",
+                      "Otros",
+                      "TotalReciboPagado",
+                      ]]
+    nuevo_df.columns = ["No. Recibo",
+                        "DNI",
+                        "Nombre Completo",
+                        "Impuestos",
+                        "Servicios",
+                        "Constancias",
+                        "Certificaciones",
+                        "Documentacion",
+                        "Otros",
+                        "Total Recibo",
+                        ]
+    return nuevo_df
+
+
 def sumar_ingresos_departo_admin_tributaria_bi(datos: DataFrame):
     datos["Total_Resultado"] = datos[[
         "ImpuestoBI",
