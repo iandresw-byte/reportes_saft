@@ -2,7 +2,7 @@
 
 import asyncio
 import flet as ft
-
+from src.services.update_services import UpdateService  # type: ignore
 from src.views.splash_view import SplashView
 from src.views.login_view import PantallaLogin
 from src.views.updater_view import PantallaActualizacion
@@ -43,12 +43,12 @@ async def app(page: ft.Page):
 
     context = AppContext()
     context.init_services()
-
-    actualizado = await validar_version()
+    actualizador = UpdateService(page)
+    actualizado = actualizador.verificar_actualizacion_inicio(None)
 
     page.clean()
 
-    if actualizado:
+    if not actualizado:
         login = PantallaLogin(page, context, log)
         page.add(await login.build())
     else:

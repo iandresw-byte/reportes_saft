@@ -358,6 +358,7 @@ class VistaPermisoOperacion:
                 reporte = PermisoOperacionReport(
                     self.permiso, self.datos_muni, "", justicia, self.datos_muni_admin)
             nombre_archivo = "po_report.pdf"
+
             ruta = os.path.join(RESULTADO_DIR, "pdf", nombre_archivo)
 
             reporte.generar_pdf(ruta)

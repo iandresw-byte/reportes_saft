@@ -41,7 +41,7 @@ class RptIngresosDeptosMensualService:
                 "No se Encontraron Ingresos Diarios Detallados Pago de Otras Tasas  (DataFrame vacío).")
         return df
 
-    def ingresos_mensual_tributaria_otras_abonos(self,  anio):
+    def ingresos_mensual_tributaria_abonos(self,  anio):
         data_res = self.repo_ingresos.obtener_mensual_ics_abonos(anio=anio)
 
         if not data_res:

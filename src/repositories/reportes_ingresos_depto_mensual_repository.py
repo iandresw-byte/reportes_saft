@@ -60,7 +60,7 @@ class IngresosDeptosMensualRepository:
             return [dict(zip(columns, r)) for r in rows]
 
     def obtener_mensual_ics_abonos(self, anio: str):
-        query = """month(F_03.FechaRecibo) as Mes,
+        query = """select month(F_03.FechaRecibo) as Mes,
                     CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 8) = '12599022' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT)  AS Constancias, 
                     CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 3) = '117' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS Impuestos,
                     CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 7) = '1521902' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS Servicios,
@@ -68,12 +68,11 @@ class IngresosDeptosMensualRepository:
                     CAST(SUM(CASE WHEN substring(F_04.CtaIngreso, 1, 6) = '152190101' THEN F_04.ValorUnitReciboDet ELSE 0 END) AS FLOAT) AS Documentacion, 
                     CAST(SUM(F_04.ValorUnitReciboDet) AS FLOAT) AS TotalReciboPagado
                     FROM  F_03 INNER JOIN
-                    F_04 ON F_03.NumRecibo = F_04.NumRecibo INNER JOIN
-                    Usuario INNER JOIN
-                    PLA_DEPARTAMENTOS ON Usuario.CodDepto = PLA_DEPARTAMENTOS.IdDeptos INNER JOIN
+                    F_04 ON F_03.NumRecibo = F_04.NumRecibo  INNER JOIN Usuario 
+                    INNER JOIN PLA_DEPARTAMENTOS ON Usuario.CodDepto = PLA_DEPARTAMENTOS.IdDeptos INNER JOIN
                     F_01 ON Usuario.UsuarioCod = F_01.CreadoPor ON F_04.NumFactura = F_01.NumAvPg INNER JOIN
                     FC_03 ON F_03.DNI = FC_03.DNI
-                    WHERE        (F_03.ReciboAnulado = 0) AND (YEAR(F_03.FechaRecibo) = ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) AND (F_01.AvPgTipoImpuesto = 8)
+                    WHERE  (F_03.ReciboAnulado = 0) AND (YEAR(F_03.FechaRecibo) = ?) AND (PLA_DEPARTAMENTOS.IdDeptos = 2) AND (F_01.AvPgTipoImpuesto = 8)
                     GROUP BY month(F_03.FechaRecibo)
                     ORDER BY Mes
                     """

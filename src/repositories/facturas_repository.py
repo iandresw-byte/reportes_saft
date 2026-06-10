@@ -82,7 +82,7 @@ class FacturasRepository:
                 FROM F_02 INNER JOIN
                 CuentaIngreso_A ON F_02.CtaIngreso = CuentaIngreso_A.CtaIngreso INNER JOIN
                 F_01 ON F_02.NumAvPg = F_01.NumAvPg AND CuentaIngreso_A.Anio = DATEPART(year, F_01.FechaEmAvPg)
-                WHERE (F_02.CtaIngreso = ?) AND (F_01.AvPgEstado = 1) and AND (F_01.AvPgTipoImpuesto in (2,3))
+                WHERE (F_02.CtaIngreso = ?) AND (F_01.AvPgEstado = 1)  AND (F_01.AvPgTipoImpuesto in (2,3))
                 GROUP BY F_02.CtaIngreso, CuentaIngreso_A.NombreCtaIngreso
                 """
         with self.conexion.cursor() as cur:

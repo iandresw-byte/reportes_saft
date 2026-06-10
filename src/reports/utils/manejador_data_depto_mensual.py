@@ -134,18 +134,18 @@ def sumar_ingresos_depto_mensual_admin_tributaria_ab(datos: DataFrame):
     # Agregar fila al DataFrame
     datos.loc[len(datos)] = fila_total
     nuevo_df = datos[["MesNombre",
-                      "Constancias",
                       "Impuestos",
                       "Servicios",
+                      "Constancias",
                       "Certificaciones",
                       "Documentacion",
                       "Otros",
                       "TotalReciboPagado",
                       ]]
     nuevo_df.columns = ["Mes",
-                        "Constancias",
                         "Impuestos",
                         "Servicios",
+                        "Constancias",
                         "Certificaciones",
                         "Documentacion",
                         "Otros",
