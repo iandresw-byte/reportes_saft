@@ -122,3 +122,10 @@ def create_Container_gnral(offset=Offset(0, 0)):
 
         animate_offset=animation_style
     )
+
+
+def create_row(controls=[]) -> Row:
+    return Row(
+        alignment=MainAxisAlignment.SPACE_EVENLY,
+        controls=[controls],
+    )

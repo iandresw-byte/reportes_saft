@@ -1,3 +1,4 @@
+
 import os
 import webbrowser
 import flet as ft
@@ -17,6 +18,8 @@ from src.ui.components.ui_botones import create_boton
 from src.ui.components.ui_text import create_texFiel_fijas
 from src.ui.components.ui_alertas import AlertaGeneral
 from src.utils.config_manager import Config
+from src.ui.ajustes_po.fields_create import create_botones_gestion, create_horiario_alcohol, create_solicitud, create_tipo_firma_eza, create_titulo, from_fields_create
+from ui.ajustes_po.layout_create_po import build_layout_create
 
 RESULTADO_DIR = Config.obtener("RUTAS", "carpeta_reportes")
 
@@ -41,32 +44,9 @@ class VistaPermisoOperacion:
         self.chk_firma_justicia = createCheckBox("¿Firma Justicia?")
         self.chk_horario_alcohol = createCheckBox(
             "¿Horario Venta de Alcohol?", on_change=self.is_Horario_venta_alcol, disable=True)
-
-        self.rd_horario_alcohol = ft.RadioGroup(disabled=True, value='0',
-                                                on_change=self.is_firma_justicia, content=ft.Row(
-
-                                                    [
-                                                        create_radio(
-                                                            value="0", label_text="Ninguno"),
-                                                        create_radio(
-                                                            value="1", label_text="¿Horario Venta de Alcohol?"),
-                                                        create_radio(value="2", label_text="No se Permite la Venta")],),
-                                                )
-
-        self.rd_tipo_solcitud = ft.RadioGroup(disabled=True, content=ft.Row(
-            [create_radio(value="Apertura", label_text="Apertura"),
-             create_radio(value="Renovacion", label_text="Renovación")],),
-        )
-        self.rd_firma = ft.RadioGroup(disabled=False, value='0',
-                                      on_change=self.is_firma_justicia, content=ft.Row(
-
-                                          [
-                                              create_radio(
-                                                  value="0", label_text="Ninguno"),
-                                              create_radio(
-                                                  value="1", label_text="Firma Justicia Municipal"),
-                                              create_radio(value="2", label_text="Firma Unidad Ambiental")],),
-                                      )
+        self.rd_horario_alcohol = create_horiario_alcohol(self)
+        self.rd_tipo_solcitud = create_solicitud()
+        self.rd_firma = create_tipo_firma_eza(self)
         if self.datos_muni["CodMuni"] == "1001":
             self.firma = ft.Row([self.rd_firma, ft.VerticalDivider(
                 width=1, color="black", thickness=1,), self.rd_horario_alcohol])
@@ -81,135 +61,18 @@ class VistaPermisoOperacion:
             actions=[ft.OutlinedButton("Aceptar", on_click=self.acetar_reg),],)
         # BOTONES
         self.permiso: Tra_PermOpe | None
-
+        self.titulo = create_titulo(self)
         self.btn_consulta = create_boton(
             "Consulta", on_click=self.consultar_recibo)
-        self.btn_guardar = create_boton(
-            "Guardar",
-            width=130,
-            disabled=True,
-            on_click=self.guardar_recibo_po)
-        self.btn_imprimir = create_boton(
-            "Imprimir",
-            width=130,
-            disabled=True,
-            on_click=self.imprimir_rept_po)
-        self.btn_horario = create_boton(
-            "Horario Venta de Alcohol",
-            width=130,
-            disabled=False,
-            on_click=self.abrir_modal_venta_bebida)
+        self.botones = create_botones_gestion(self)
         if self.datos_muni["CodMuni"] == "1001":
-            self.btn_horario.visible = True
+            self.botones[2].visible = True
         else:
-            self.btn_horario.visible = False
-        self.btn_editar = create_boton("Editar", width=130, disabled=True)
-        # CAJAS DE TEXTO
-        self.txt_no_recibo = create_texFiel_fijas(
-            'No. de Recibo', width=95, read_only=False)
-        self.txt_no_permiso = create_texFiel_fijas('No. de Permiso')
-        self.txt_periodo = create_texFiel_fijas('Periodo',)
-        self.txt_ini_operaion = create_texFiel_fijas('Inicio Operacion')
-        self.txt_telefono = create_texFiel_fijas('Telefono')
-        self.txt_num_renovacion = create_texFiel_fijas('Numero de Renovacion')
-        self.txt_rtn = create_texFiel_fijas('R.T.N')
-        self.txt_rtm = create_texFiel_fijas('R.T.M.')
-        self.txt_fecha_emission = create_texFiel_fijas('Fecha Emision')
-        self.txt_nombre_establecimiento = create_texFiel_fijas(
-            'Nombre del Establecimiento')
-        self.txt_nombrePropietario = create_texFiel_fijas(
-            'Nombre del Propietario')
-        self.txt_identidad = create_texFiel_fijas('Identidad del Propietario')
-        self.txt_ubicacion = create_texFiel_fijas('Direccion')
-        self.txt_claveCatastral = create_texFiel_fijas('Clave Catastral')
-        self.txt_act_economica = create_texFiel_fijas('Actividad Economica')
-        self.txt_tipo_establecimiento = create_texFiel_fijas(
-            'Tipo Establecimiento')
+            self.botones[2].visible = False
 
-        self.conten_acerca_de = create_container(
-            expand=True,
-            col=12,
-            controls=[
-                ft.Image(src=r"\assets\saft.png"),
-                ft.Text(
-                    "PERMISO DE OPERACION DE NEGOCIOS",
-                    size=24,
-                    weight=self.ft.FontWeight.BOLD,
-                    color=self.texto_color,
-                    text_align=self.ft.TextAlign.CENTER,
-                ),
-                ft.Divider(),
-                ft.Row(
-                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                    controls=[self.txt_no_recibo,
-                              self.btn_consulta
-                              ],
-                ),
-                ft.Divider(),
-                ft.Row(
-                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                    controls=[self.txt_no_permiso,
-                              self.txt_periodo,
-                              self.txt_ini_operaion,
-                              self.txt_telefono,
-                              self.txt_num_renovacion
-                              ],
-                ),
-                ft.Row(
-                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                    controls=[self.txt_rtm,
-                              self.txt_rtn,
-                              self.txt_fecha_emission,
-                              ],
-                ),
-                ft.Row(
-                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                    controls=[self.txt_nombre_establecimiento,
-                              ],
-                ),
-                ft.Row(
-                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                    controls=[self.txt_identidad, self.txt_nombrePropietario
-                              ],
-                ),
-                ft.Row(
-                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                    controls=[self.txt_claveCatastral, self.txt_ubicacion
-                              ],
-                ),
-                ft.Row(
-                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                    controls=[self.txt_act_economica, self.txt_tipo_establecimiento
-                              ],
-                ),
-                ft.Divider(),
-                ft.Row(
-                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                    controls=[
-                        self.firma,
-                        ft.VerticalDivider(
-                            width=1, color="black", thickness=1,),
-                        self.rd_tipo_solcitud,
-                    ],
-                ),
-                ft.Divider(),
-                ft.Row(
-                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                    controls=[self.btn_guardar, self.btn_horario, self.btn_imprimir
-                              ],
-                ),
-            ],
-        )
-        self.frame = ft.Container(
-            expand=True,
-            content=ft.ResponsiveRow(
-                expand=True,
-                controls=[
-                    self.conten_acerca_de,
-                ],
-                alignment=ft.MainAxisAlignment.CENTER, col=12
-            )
-        )
+        self.cajas_texto = from_fields_create(self)
+        self.frame = build_layout_create(
+            self.titulo, self.cajas_texto, self.btn_consulta, self.firma, self.rd_tipo_solcitud, self.botones)
 
     def build(self):
         return ft.Column(expand=True, controls=[
@@ -242,7 +105,7 @@ class VistaPermisoOperacion:
         self.alert_recibo.update()
 
     def consultar_recibo(self, e):
-        num_recibo = self.txt_no_recibo.value
+        num_recibo = self.cajas_texto[0].value
         existe = self.repo_permiso.existe_po(num_recibo)
         if self.datos_muni["CodMuni"] == "1001":
             justicia = self.rd_firma.value
@@ -322,12 +185,12 @@ class VistaPermisoOperacion:
         else:
             self.permiso.FirmaJ = self.chk_firma_justicia.value
         if self.repo_permiso.guardar_perm_operacion(self.permiso):
-            self.btn_guardar.disabled = True
-            self.btn_guardar.style.bgcolor = self.bg_2_color
-            self.btn_guardar.update()
-            self.btn_imprimir.disabled = False
-            self.btn_imprimir.style.bgcolor = self.bg_color
-            self.btn_imprimir.update()
+            self.botones[0].disabled = True
+            self.botones[0].style.bgcolor = self.bg_2_color
+            self.botones[0].update()
+            self.botones[1].disabled = False
+            self.botones[1].style.bgcolor = self.bg_color
+            self.botones[1].update()
             self.page.update()
 
     def imprimir_rept_po(self, e):
@@ -366,32 +229,17 @@ class VistaPermisoOperacion:
             self.page.open(self.ft.SnackBar(fila_nack_bar,
                                             bgcolor=ft.Colors.GREEN_700, duration=20
                                             ))
-            self.btn_guardar.disabled = True
-            self.btn_guardar.style.bgcolor = self.bg_2_color
-            self.btn_guardar.update()
+            self.botones[0].disabled = True
+            self.botones[0].style.bgcolor = self.bg_2_color
+            self.botones[0].update()
 
-            self.btn_imprimir.disabled = True
-            self.btn_imprimir.style.bgcolor = self.bg_2_color
-            self.btn_imprimir.update()
+            self.botones[1].disabled = True
+            self.botones[1].style.bgcolor = self.bg_2_color
+            self.botones[1].update()
             self.txt_no_permiso.value = str(self.permiso.NoPermiso)
 
-            self.txt_no_recibo.value = ""
-            self.txt_periodo.value = ""
-            self.txt_ini_operaion.value = ""
-            self.txt_telefono.value = ""
-            self.txt_rtm.value = ""
-            self.txt_rtn.value = ""
-            self.txt_fecha_emission.value = ""
-            self.txt_nombre_establecimiento.value = ""
-            self.txt_identidad.value = ""
-            self.txt_nombrePropietario.value = ""
-            self.txt_claveCatastral.value = ""
-            self.txt_ubicacion.value = ""
-            self.txt_act_economica.value = ""
-            self.txt_tipo_establecimiento.value = ""
-            self.rd_tipo_solcitud.value = ""
-            self.txt_num_renovacion.value = ""
-            self.txt_no_permiso.value = ""
+            for caja in self.cajas_texto:
+                caja.value = ""
             if self.datos_muni["CodMuni"] == "1001":
                 self.firma.value = "0"
             else:
@@ -404,13 +252,13 @@ class VistaPermisoOperacion:
                 ft.Text(f"Error: {str(ex)}", size=14),
                 bgcolor=ft.Colors.RED_700,
             ))
-            self.btn_guardar.disabled = True
-            self.btn_guardar.style.bgcolor = self.bg_color
-            self.btn_guardar.update()
+            self.botones[0].disabled = True
+            self.botones[0].style.bgcolor = self.bg_color
+            self.botones[0].update()
 
-            self.btn_imprimir.disabled = True
-            self.btn_imprimir.style.bgcolor = self.bg_color
-            self.btn_imprimir.update()
+            self.botones[1].disabled = True
+            self.botones[1].style.bgcolor = self.bg_color
+            self.botones[1].update()
             self.page.update()
 
     def cerrar_modal(self):

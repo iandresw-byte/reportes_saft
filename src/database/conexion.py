@@ -1,11 +1,7 @@
-import configparser
-
-from cryptography.fernet import Fernet, InvalidToken
+from cryptography.fernet import Fernet
 import pyodbc
 import time
-import os
 from contextlib import contextmanager
-from src.utils.config_manager import Config
 from cryptography.fernet import Fernet
 
 
@@ -17,24 +13,12 @@ class ConexionBD:
         self._conectar()
 
     def _conectar(self):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        print(base_dir)
-        config_path = os.path.join(base_dir,  "config.ini")
-
-        config = configparser.ConfigParser()
-        config.read(config_path)
         key = b'sXKA2F58MaGlAEgZDRRYJ-xLedKzXq4rWw6gD8_iBVA='
         f = Fernet(key)
-
         clave_encriptada = 'gAAAAABpq5BMbtaMNHLv1uViW7XcSMAs6LnaJSIZxuooc5VCZP71vKxlgfAVGdZIJeWAzjdJs2ov9n-bkmucTCdYJCdUuV4EXg=='
         server_user = 'ANDBE'
-
         server_pass = f.decrypt(clave_encriptada.encode()).decode()
 
-        self.log.info(f"Ruta config:, {server_user}")
-        self.log.info(f"clave_encriptada: {clave_encriptada}")
-        self.log.info(f"Password: {server_pass}")
-        self.log.info(server_user)
         if self.tipo_bd == 'SAFT':
             self.conexion = pyodbc.connect(
                 f"DSN=SAFTSQL;"

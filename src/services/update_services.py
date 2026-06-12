@@ -82,3 +82,22 @@ class UpdateService:
 
         except Exception as ex:
             return False
+
+    def actualizacion(self):
+        try:
+            base_dir = r"C:\Program Files (x86)\SAFT\reportes_py"
+            updater_ui = os.path.join(base_dir, "updater.exe")
+
+            if os.path.exists(updater_ui):
+
+                time.sleep(1)
+
+                subprocess.Popen([updater_ui], shell=True)
+                self.page.window.close()
+                return
+            else:
+
+                return
+
+        except Exception as ex:
+            return
