@@ -56,3 +56,19 @@ class Config:
 
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             config.write(f)
+
+    @staticmethod
+    def guardar_tamanio_reporte(tamanio_reporte: str):
+
+        config = configparser.ConfigParser()
+
+        if os.path.exists(CONFIG_FILE):
+            config.read(CONFIG_FILE, encoding="utf-8")
+
+        if "APREMIO" not in config:
+            config["APREMIO"] = {}
+
+        config["APREMIO"]["tipo_documento"] = tamanio_reporte
+
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            config.write(f)

@@ -6,13 +6,14 @@ import pandas as pd
 from src.models.usuario_model import Usuario
 from src.repositories.apremio_repository import ApremioRepository, ApremioDetalle, ApremioAvPg, ApremioEnDoc, EstadoApremio, ApremioRelacion
 from src.services.parametro_service import ParametroService
-from src.reports.apremio_report import ApremioReport
-from src.utils.cuentas_apremio import clasificar_mora_gob
+
+from src.utils.cuentas_apremio_gob import clasificar_mora_gob
+from src.utils.cuentas_apremio_sami import clasificar_mora_sami
 
 
 class ApremioService:
     def __init__(self, conexion, sistem, usuario_sesion: Usuario | None):
-        self.repo = ApremioRepository(conexion)
+        self.repo = ApremioRepository(conexion, sistem)
         self.parametro_systema = ParametroService(conexion)
         self.sys = sistem
         self.user = usuario_sesion
@@ -77,13 +78,16 @@ class ApremioService:
                                                                cod_aldea=cod_aldea,
                                                                cod_barrio=cod_barrio)
         for dato in dato_apremio:
-            mora = clasificar_mora_gob(dato, tipo_impuesto)
+            if self.sys["TpoCuenta"]:
+                mora = clasificar_mora_sami(dato, tipo_impuesto)
+            else:
+                mora = clasificar_mora_gob(dato, tipo_impuesto)
             num_documeto = self.repo.get_num_documento()
             fila = {'dni': dato['DNI'],
                     'nombre': dato['Pnombre'] + ' ' + dato['SNombre'] + ' ' + dato['PApellido'] + ' ' + dato['SApellido'],
                     'direccion': dato['Direccion'],
                     'clave_catastro': dato['ClavesCatastro'],
-                    'periodo': f"{dato['mes_ini']} - {dato['mes_fin']}",
+                    'periodo': f"{dato['mes_ini'].strftime("%d-%m-%Y")} - {dato['mes_fin'].strftime("%d-%m-%Y")}",
                     "saldo": dato['total'],
                     "mora": mora,
                     "num_documeto": num_documeto
@@ -123,16 +127,7 @@ class ApremioService:
     def obtener_mora_sami(self, tipo_impuesto: None, tipo_persona: None):
         pass
 
-    def generar_pdf_apremio(self, titulo="IMPUESTOS, TASAS Y SERVICIOS MUNICIPALES EN MORA"):
-        data_muni = self.parametro_systema.obtener_datos_municipalidad()
-        ruta = "APREMIO_CONSOLIDADO.pdf"
-        reporte = ApremioReport(
-            self.data_ordenada,
-            data_muni,
-            titulo
-        )
-        reporte.generar_pdf(ruta)
-        webbrowser.open_new_tab(f"file://{ruta}")
+ 
 
     def insert_factura(self, identidad, tipo_impuesto, id_docuemto):
         data = self.repo.get_facturas_a_requerir(
@@ -263,6 +258,24 @@ class ApremioService:
            # 1️⃣ Merge estados
             if not df_estados.empty:
                 df = df.merge(df_estados, on="IdDocumento", how="left")
+                df["Monto_act_formateado"] = df["mora_actual"].apply(
+                lambda x: f"HNL. {x:,.2f}" if pd.notnull(x) else ""
+                )
+                df["Monto_pagado_formateado"] = df["pagado"].apply(
+                lambda x: f"HNL. {x:,.2f}" if pd.notnull(x) else ""
+                )
+                df["Monto_anulado_formateado"] = df["anulado"].apply(
+                    lambda x: f"HNL. {x:,.2f}" if pd.notnull(x) else ""
+                )
+                df["Monto_plan_pago_formateado"] = df["plan_pago"].apply(
+                    lambda x: f"HNL. {x:,.2f}" if pd.notnull(x) else ""
+                )
+            else:
+                valor = 0
+                df["Monto_act_formateado"] = f"HNL. {valor:,.2f}"
+                df["Monto_pagado_formateado"] = f"HNL. {valor:,.2f}"
+                df["Monto_anulado_formateado"] =f"HNL. {valor:,.2f}"
+                df["Monto_plan_pago_formateado"] = f"HNL. {valor:,.2f}"
 
             # 2️⃣ Merge 2do requerimiento (1ro → 2do)
             if not df_2do.empty:
@@ -350,19 +363,10 @@ class ApremioService:
             df["Monto_ini_formateado"] = df["TotalMora"].apply(
                 lambda x: f"HNL. {x:,.2f}" if pd.notnull(x) else ""
             )
-            df["Monto_act_formateado"] = df["mora_actual"].apply(
-                lambda x: f"HNL. {x:,.2f}" if pd.notnull(x) else ""
-            )
 
-            df["Monto_pagado_formateado"] = df["pagado"].apply(
-                lambda x: f"HNL. {x:,.2f}" if pd.notnull(x) else ""
-            )
-            df["Monto_anulado_formateado"] = df["anulado"].apply(
-                lambda x: f"HNL. {x:,.2f}" if pd.notnull(x) else ""
-            )
-            df["Monto_plan_pago_formateado"] = df["plan_pago"].apply(
-                lambda x: f"HNL. {x:,.2f}" if pd.notnull(x) else ""
-            )
+           
+
+            
             df["NombreCompleto"] = (
                 df["Pnombre"].fillna("") + " " +
                 df["SNombre"].fillna("") + " " +
@@ -448,11 +452,16 @@ class ApremioService:
         self.repo.actaulizar_reiniciar_TipoImpuesto(
             data["IdDocumento"], data['TipoImpuesto'])
         for dato in dato_apremio:
-            mora = clasificar_mora_gob(dato, data['TipoImpuesto'])
+            if self.sys["TpoCuenta"]:
+                mora = clasificar_mora_sami(dato,  data['TipoImpuesto'])
+            else:
+                mora = clasificar_mora_gob(dato,  data['TipoImpuesto'])
             num_documeto = self.repo.get_num_documento()
             fila = {'dni': dato['DNI'],
                     'nombre': dato['Pnombre'] + ' ' + dato['SNombre'] + ' ' + dato['PApellido'] + ' ' + dato['SApellido'],
-                    'periodo': f"{dato['mes_ini']} - {dato['mes_fin']}",
+                    'direccion': dato['Direccion'],
+                    'clave_catastro': dato['ClavesCatastro'],
+                    'periodo': f"{dato['mes_ini'].strftime("%d-%m-%Y")} - {dato['mes_fin'].strftime("%d-%m-%Y")}",
                     "saldo": dato['total'],
                     "mora": mora,
                     "num_documeto": num_documeto
@@ -541,11 +550,16 @@ class ApremioService:
             tipo_impuesto = 10
 
         for dato in dato_apremio:
-            mora = clasificar_mora_gob(dato, tipo_impuesto)
+            if self.sys["TpoCuenta"]:
+                mora = clasificar_mora_sami(dato, tipo_impuesto)
+            else:
+                mora = clasificar_mora_gob(dato, tipo_impuesto)
             num_documeto = self.repo.get_num_documento()
             fila = {'dni': dato['DNI'],
                     'nombre': dato['Pnombre'] + ' ' + dato['SNombre'] + ' ' + dato['PApellido'] + ' ' + dato['SApellido'],
-                    'periodo': f"{dato['mes_ini']} - {dato['mes_fin']}",
+                    'direccion': dato['Direccion'],
+                    'clave_catastro': dato['ClavesCatastro'],
+                    'periodo': f"{dato['mes_ini'].strftime("%d-%m-%Y")} - {dato['mes_fin'].strftime("%d-%m-%Y")}",
                     "saldo": dato['total'],
                     "mora": mora,
                     "num_documeto": num_documeto

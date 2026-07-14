@@ -237,15 +237,13 @@ def table_identifiacion_top_ics(vista, df: DataFrame, pagina=1, filas_por_pagina
                 rows.append(
                     ft.DataRow(
                         cells=[
-                            ft.DataCell(create_text_table(
-                                str(index))),
+                            ft.DataCell(create_text_table( str(index))),
                             ft.DataCell(create_text_table(row["rtm"])),
-                            ft.DataCell(create_text_table(
-                                row["establecimiento"])),
+                            ft.DataCell(create_text_table(row["establecimiento"])),
                             ft.DataCell(create_text_table(row["dni"])),
                             ft.DataCell(create_text_table(row["nombre"])),
                             ft.DataCell(create_text_table(row["periodo"])),
-                            ft.DataCell(create_text_table(row["mora"]),),
+                            ft.DataCell(create_text_table(row["mora"])),
                             ft.DataCell(
                                 ft.Row(
                                     [
@@ -276,6 +274,194 @@ def table_identifiacion_top_ics(vista, df: DataFrame, pagina=1, filas_por_pagina
                           numeric=True,
                           tooltip="Monto de Mora Requerido",),
             ft.DataColumn(label=ft.Text("Acciones")),
+        ],
+
+        rows=rows,
+        expand=True
+    )
+
+
+def table_identifiacion_facturacion_pp(vista, df: DataFrame, pagina=1, filas_por_pagina=10) -> ft.DataTable:
+    def ver(e):
+        fila = e.control.data
+        vista.abrir_modal_ver(fila)
+
+    def obtener_pagina(df, pagina=1, filas_por_pagina=10):
+        inicio = (pagina - 1) * filas_por_pagina
+        fin = inicio + filas_por_pagina
+        if isinstance(df, DataFrame):
+            if not df.empty:
+                return df.iloc[inicio:fin]
+
+    rows = []
+    if isinstance(df, DataFrame):
+        if df is not None:
+            for index, row in df.iterrows():
+                if row["AvPgEstado"] ==2:
+                    meses_vencidos = "--"
+                else:
+                    meses_vencidos = row["MesesVencidos"]
+                rows.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(create_text_table(
+                                str(index))),
+                            ft.DataCell(create_text_table(row["NumAvPg"])),
+                            ft.DataCell(create_text_table(row["ValorCouta"])),
+                            ft.DataCell(create_text_table(row["srtEstado"])),
+                            ft.DataCell(create_text_table(str(meses_vencidos))),
+                            #ft.DataCell(
+                            #    ft.Row(
+                            #        [
+                            #            ft.IconButton(
+                            #                icon=ft.Icons.VISIBILITY,
+                            #                tooltip="Ver",
+                            #                data=row.to_dict(),
+                            #                on_click=ver,
+                            #            ),
+                            #        ],
+                            #        spacing=5,
+                            #        alignment=ft.MainAxisAlignment.CENTER
+                            #    )
+                            #),
+                        ]
+                    )
+                )
+
+    return ft.DataTable(
+        columns=[
+            ft.DataColumn(label=ft.Text("No.")),
+            ft.DataColumn(label=ft.Text("No. Factura")),
+            ft.DataColumn(label=ft.Text("Valor")),
+            ft.DataColumn(label=ft.Text("Estado")),
+            ft.DataColumn(label=ft.Text("Meses Vencidos")),
+       
+            #ft.DataColumn(label=ft.Text("Acciones")),
+        ],
+
+        rows=rows,
+        expand=True
+    )
+
+
+def table_identifiacion_cuota_pp(vista, df: DataFrame, pagina=1, filas_por_pagina=10) -> ft.DataTable:
+    def ver(e):
+        fila = e.control.data
+        vista.abrir_modal_ver(fila)
+
+    def obtener_pagina(df, pagina=1, filas_por_pagina=10):
+        inicio = (pagina - 1) * filas_por_pagina
+        fin = inicio + filas_por_pagina
+        if isinstance(df, DataFrame):
+            if not df.empty:
+                return df.iloc[inicio:fin]
+
+    rows = []
+    if isinstance(df, DataFrame):
+        if df is not None:
+            for index, row in df.iterrows():
+                if row["AvPgEstado"] ==2:
+                    meses_vencidos = "--"
+                else:
+                    meses_vencidos = row["MesesVencidos"]
+                rows.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(create_text_table(
+                                str(index))),
+                            ft.DataCell(create_text_table(row["NumAvPg"])),
+                            ft.DataCell(create_text_table(row["ValorCouta"])),
+                            ft.DataCell(create_text_table(row["srtEstado"])),
+                            ft.DataCell(create_text_table(str(meses_vencidos))),
+                            ft.DataCell(create_text_table(row["srObservacion"])),
+                            #ft.DataCell(
+                            #    ft.Row(
+                            #        [
+                            #            ft.IconButton(
+                            #                icon=ft.Icons.VISIBILITY,
+                            #                tooltip="Ver",
+                            #                data=row.to_dict(),
+                            #                on_click=ver,
+                            #            ),
+                            #        ],
+                            #        spacing=5,
+                            #        alignment=ft.MainAxisAlignment.CENTER
+                            #    )
+                            #),
+                        ]
+                    )
+                )
+
+    return ft.DataTable(
+        columns=[
+            ft.DataColumn(label=ft.Text("No.")),
+            ft.DataColumn(label=ft.Text("No. Factura")),
+            ft.DataColumn(label=ft.Text("Valor")),
+            ft.DataColumn(label=ft.Text("Estado")),
+            ft.DataColumn(label=ft.Text("Meses Vencidos")),
+            ft.DataColumn(label=ft.Text("Observacion")),
+       
+            #ft.DataColumn(label=ft.Text("Acciones")),
+        ],
+
+        rows=rows,
+        expand=True
+    )
+
+
+def table_identifiacion_facturacion_pp(vista, df: DataFrame, pagina=1, filas_por_pagina=10) -> ft.DataTable:
+    def ver(e):
+        fila = e.control.data
+        vista.abrir_modal_ver(fila)
+
+    def obtener_pagina(df, pagina=1, filas_por_pagina=10):
+        inicio = (pagina - 1) * filas_por_pagina
+        fin = inicio + filas_por_pagina
+        if isinstance(df, DataFrame):
+            if not df.empty:
+                return df.iloc[inicio:fin]
+
+    rows = []
+
+    if isinstance(df, DataFrame):
+        if df is not None:
+            for index, row in df.iterrows():
+                rows.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(create_text_table(
+                                str(index))),
+                            ft.DataCell(create_text_table(row["NumAvPg"])),
+                            ft.DataCell(create_text_table(row["valorFacturaenPP"])),
+                            ft.DataCell(create_text_table(row["strEstado"])),
+                         
+                            #ft.DataCell(
+                            #    ft.Row(
+                            #        [
+                            #            ft.IconButton(
+                            #                icon=ft.Icons.VISIBILITY,
+                            #                tooltip="Ver",
+                            #                data=row.to_dict(),
+                            #                on_click=ver,
+                            #            ),
+                            #        ],
+                            #        spacing=5,
+                            #        alignment=ft.MainAxisAlignment.CENTER
+                            #    )
+                            #),
+                        ]
+                    )
+                )
+
+    return ft.DataTable(
+        columns=[
+            ft.DataColumn(label=ft.Text("No.")),
+            ft.DataColumn(label=ft.Text("No. Factura")),
+            ft.DataColumn(label=ft.Text("Valor")),
+            ft.DataColumn(label=ft.Text("Estado")),
+        
+       
+            #ft.DataColumn(label=ft.Text("Acciones")),
         ],
 
         rows=rows,

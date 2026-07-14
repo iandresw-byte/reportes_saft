@@ -2,6 +2,7 @@
 
 import asyncio
 import flet as ft
+
 from src.services.aldea_servives import AldeaService
 from src.services.apremio_service import ApremioService
 from src.services.apremio_identifiacion_services import ApremioIdentificacionService
@@ -15,7 +16,9 @@ from src.ui.apremio.modals_apremio.ver_apremio_modal import abrir_modal_ver_apre
 from src.ui.modals.apremio_2_modal import abrir_modal_rpt_apremio_2do
 from src.ui.modals.apremio_certificion_modal import abrir_modal_rpt_cerificacion
 from src.ui.components.ui_container import container_titulo, create_container, create_container_card, create_container_tabla
-from src.ui.apremio.eventos_apremio import generar_primer_requerimiento, generar_primer_requerimiento_individual, generar_segundo_requerimiento, obtener_contriuyente, obtener_contriuyente_proceso, reiniciar_primer_requerimiento, generar_certificacion
+from src.ui.apremio.eventos_apremio import( generar_primer_requerimiento, generar_primer_requerimiento_individual, 
+                                           generar_segundo_requerimiento, obtener_contriuyente, 
+obtener_contriuyente_proceso, reiniciar_primer_requerimiento, generar_certificacion)
 from src.ui.modals.apremio_modal import abrir_modal_rpt_apremio_1er
 from src.ui.components.ui_text import txt_label_text_tabs
 from src.ui.components.ui_colors import color_borde, color_texto, color_texto_2, color_bg, color_bg_2
@@ -157,7 +160,7 @@ class VistaApremio:
             self.app.conexion_saft, self.datos_system, self.user)
         self.aldeas = AldeaService(self.app.conexion_saft)
         self.contribuente = ContribuyenteService(self.app.conexion_saft)
-
+        
         self.pagina_actual = 1
         self.filas_por_pagina = 10
         self.df = self.apremio.get_table_apremio()
@@ -271,7 +274,8 @@ class VistaApremio:
 
     def generar_apremio_pdf_individual(self, e):
         self.tipo_doc = 1
-        if e:
+        print(self.identidad)
+        if isinstance(e, str):
             self.identidad = e
         asyncio.run(generar_primer_requerimiento_individual(self, e))
 

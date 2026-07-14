@@ -51,7 +51,7 @@ def abrir_modal_editar_apremio(vista, fila):
     tipo_impuesto = create_texFiel_fijas(
         "Tipo Impuesto", value=fila["TipoImpDescripcionLong"])
     txt_movimiento = create_texFiel_fijas(
-        "Movimientos", value=fila["estado"], read_only=True)
+        "Movimientos", value=fila["Estado"], read_only=True)
     txt_observaciones = create_texFiel_fijas(
         "Observaciones", value=fila["Observacion"].replace("|", "\n"), read_only=True)
     txt_observaciones.multiline = True

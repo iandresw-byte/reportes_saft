@@ -12,7 +12,7 @@ class AldeaService:
                 "No se encontraron Aldeas (respuesta vacía).")
         return data_res
 
-    def obtener_barrio(self, cod_aldea):
+    def obtener_barrio(self, cod_aldea="%"):
         data_res = self.repository.obtener_barrios(cod_aldea)
         if not data_res:
             raise ValueError("No se encontraron Barrios (respuesta vacía).")

@@ -30,7 +30,7 @@ class AppContext:
     def init_saft(self):
         if not self._conexion_saft:
             self._conexion_saft = ConexionBD('SAFT', self.logger)
-            self._auth_service = UsuarioService(self._conexion_saft)
+            self._auth_service = UsuarioService( self._conexion_saft)
             self._administracion_service = ParametroService(
                 self._conexion_saft)
 
@@ -40,7 +40,7 @@ class AppContext:
 
     def init_services(self):
         self._conexion = ConexionBD('SAFT', self.logger)
-        self._auth_service = UsuarioService(self._conexion)
+        self._auth_service = UsuarioService(self._conexion )
         self._administracion_service = ParametroService(self._conexion_saft)
 
     @property

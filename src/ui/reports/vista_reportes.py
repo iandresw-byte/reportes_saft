@@ -2,6 +2,8 @@
 
 import asyncio
 import datetime
+
+from src.services.cuentas_ingreso_services import CuentasService
 from src.services.reportes_ingresos_deptos_diario_services import RptIngresosDeptosDiarioService
 from src.services.reportes_ingresos_deptos_mensual_services import RptIngresosDeptosMensualService
 from src.services.apremio_service import ApremioService
@@ -13,13 +15,14 @@ from src.services.mora_ip_services import MoraIPService
 from src.services.mora_ics_sevices import MoraICSService
 from src.services.mora_sp_services import MoraSPService
 from src.services.update_services import UpdateService
+from src.services.abonados_ps_services import AbonadosSPService
 from src.services.permiso_operacion_services import PermisooperacionServices
 from src.services.plan_pago_services import PlanesPagoService
 from src.services.mora_aldea_services import MoraAldeaService
 from src.services.trancicion_traspaso_servivces import TrancicionTraspasoService
 from src.services.trancicion_traspaso_det_services import TrancicionTraspasoDetalleService
 from src.services.analisis_ingresos_services import AnalisisIngresosService
-from src.services.estratificacion_services import EstratificacionService
+from src.services.establecimientos_services import EstablecimientosService
 from src.services.reportes_ingresos_deptos_services import RptIngresosDeptosService
 from src.services.reportes_sar_services import SARReportesService
 from src.ui.modals.estratificacion_modal import abrir_modal_estratificacion
@@ -36,9 +39,9 @@ from src.ui.components.ui_container import container_titulo, create_container
 from src.ui.reports.eventos_reportes import (anula_plan_pago, generar_analisis_ingresos, generar_excel_estratificacion, generar_excel_estratificacion_sar,
                                              generar_mora_bi, generar_mora_bi_aldea_anio_excel,
                                              generar_mora_bi_aldea_anio_pdf, generar_mora_ics, generar_mora_ip,
-                                             generar_mora_sp, generar_pdf_mora_vs_ingresos, generar_excel_mora_vs_ingresos, generar_reporte_excel_bomberos,
+                                             generar_mora_sp, generar_pdf_mora_vs_ingresos, generar_excel_mora_vs_ingresos, generar_reporte_excel_abonado_x_cuenta, generar_reporte_excel_bomberos, generar_reporte_excel_establecimiento_por_actividad,
                                              generar_reporte_excel_ingreso_depto,
-                                             generar_reporte_excel_ingreso_depto_detallado, generar_reporte_excel_ingreso_depto_diario, generar_reporte_pdf_bomberos, generar_reporte_pdf_ingreso_depto,
+                                             generar_reporte_excel_ingreso_depto_detallado, generar_reporte_excel_ingreso_depto_diario, generar_reporte_pdf_abonado_x_cuenta, generar_reporte_pdf_bomberos, generar_reporte_pdf_establecimiento_por_actividad, generar_reporte_pdf_ingreso_depto,
                                              generar_reporte_pdf_ingreso_depto_detallado, generar_reporte_pdf_ingreso_depto_diario, generar_reporte_pdf_ingreso_depto_mensual,  generar_reporte_trancicicon,
                                              generar_reporte_trancicicon_det_amb, generar_reporte_trancicicon_det_bi,
                                              generar_reporte_trancicicon_det_ics, generar_reporte_trancicicon_det_ip,
@@ -49,6 +52,8 @@ from src.ui.components.analisi_ingresos_modal import abrir_analisis_ingresos
 from src.ui.modals.anula_pp_modal import abrir_anula_plan_pago
 from src.ui.modals.apremio_modal import abrir_modal_rpt_apremio_1er
 from src.ui.modals.modal_ingresos_bomberos import abrir_modal_rpt_bomberos
+from src.ui.modals.mora_abonados_por_servicio_modal import abrir_modal_abonados_x_servicio
+from src.ui.modals.mora_establecimientos_comerciales_rubro import abrir_modal_establecimientos_comerciales_rubro
 
 
 class VistaReportes:
@@ -102,15 +107,20 @@ class VistaReportes:
         self.trancicion_detalle = TrancicionTraspasoDetalleService(
             self.app.conexion_saft, self.datos_system)
         self.aldeas = AldeaService(self.app.conexion_saft)
+        self.abonados_sp = AbonadosSPService(self.app.conexion_saft)
+        self.cta_ingresos = CuentasService(self.app.conexion_saft)
+        
+        
         self.mora_aldea = MoraAldeaService(
             self.app.conexion_saft, self.datos_system)
         self.analisis = AnalisisIngresosService(
             self.app.conexion_saft, self.datos_system)
-        self.plan_pago = PlanesPagoService(self.app.conexion_saft)
+        self.plan_pago = PlanesPagoService(self.app.conexion_saft,self.datos_system,self.datos_muni, self.administracion)
         self.permiso_operacion = PermisooperacionServices(
             self.app, self.datos_system)
-        self.estratificacion = EstratificacionService(
+        self.rpt_establecimientos = EstablecimientosService(
             self.app.conexion_saft, self.datos_system)
+
         self.estratificacion_sar = SARReportesService(
             self.app.conexion_saft, self.datos_system)
         self.ingresos_deptos = RptIngresosDeptosService(
@@ -228,6 +238,26 @@ class VistaReportes:
         self.page.open(self.dialog)
         self.page.update()
 
+    
+    def abrir_modal_mora_abona_x_tipo(self, e):
+        self.cuenta_sp = ""
+        self.cod_aldea =""
+        self.cod_barrio = ""
+        self.cuentas_sp = self.cta_ingresos.get_cuentas_abonado()
+        self.dialog = abrir_modal_abonados_x_servicio(self, e)
+        self.page.open(self.dialog)
+        self.page.update()
+
+    def abrir_modal_mora_comercio_x_tipo(self, e):
+        self.cuenta_ics = ""
+        self.cod_aldea =""
+        self.cod_barrio = ""
+        self.cuentas_ics = self.cta_ingresos.get_cuentas_actividad_aconomica()
+        self.dialog = abrir_modal_establecimientos_comerciales_rubro(self, e)
+        self.page.open(self.dialog)
+        self.page.update()
+
+
     def abrir_modal_ingresos_detallados_depto(self, e):
         self.fecha_ini = ''
         self.fecha_fin = ''
@@ -269,6 +299,20 @@ class VistaReportes:
         tipo_impuesto = self.tipo_impuesto.current.value
         tipo_persona = self.tipo_persona.current.value
         self.apremio.obtener_mora_gob(tipo_impuesto, tipo_persona)
+
+
+    def generar_reporte_mora_abonado_por_cuenta_pdf(self, e):
+        asyncio.run(generar_reporte_pdf_abonado_x_cuenta(self, e))
+
+    def generar_reporte_mora_abonado_por_cuenta_excel(self, e):
+        asyncio.run(generar_reporte_excel_abonado_x_cuenta(self, e))
+
+    def generar_reporte_mora_establecimiento_por_actividad_pdf(self, e):
+        asyncio.run(generar_reporte_pdf_establecimiento_por_actividad(self, e))
+
+    def generar_reporte_mora_establecimiento_por_actividad_excel(self, e):
+        asyncio.run(generar_reporte_excel_establecimiento_por_actividad(self, e))
+
 
     def generar_excel_aldea_mora(self, e):
         asyncio.run(generar_excel_mora_vs_ingresos(self, e))

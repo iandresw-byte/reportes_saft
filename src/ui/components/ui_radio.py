@@ -1,4 +1,4 @@
-from flet import Radio, TextStyle, RadioGroup, Column,  MainAxisAlignment, Row
+from flet import Container, CrossAxisAlignment, Radio, TextStyle, RadioGroup, LabelPosition, Column,  MainAxisAlignment, Row, Ref
 from src.ui.components.ui_colors import color_check, color_texto
 
 
@@ -116,24 +116,6 @@ def rd_tipo_impuesto(tipo_impuesto):
     )
 
 
-def rd_tipo_impuesto(tipo_impuesto):
-    return RadioGroup(
-        ref=tipo_impuesto,
-        value="%",
-        content=Column([
-            create_radio(value="0", label_text="Otras Tasas"),
-            create_radio(value="1", label_text="Bienes Inmuebles"),
-            create_radio(value="4", label_text="Impuesto Personal"),
-            create_radio(
-                value="2", label_text="Industria, Comercio y Servicio"),
-            create_radio(value="3", label_text="Permiso de Operación"),
-            create_radio(value="5", label_text="Servicios Públicos"),
-            create_radio(value="7", label_text="Planes de Pago"),
-            create_radio(value="%", label_text="Todos (General)")
-        ],)
-    )
-
-
 def rd_tipo_entrega_apremio(tipo_res):
     return RadioGroup(
         ref=tipo_res,
@@ -150,6 +132,9 @@ def rd_tipo_entrega_apremio(tipo_res):
     )
 
 
+
+
+
 def rd_tipo_persona(tipo_persona):
     return RadioGroup(
         ref=tipo_persona,
@@ -160,3 +145,61 @@ def rd_tipo_persona(tipo_persona):
             create_radio(value="%", label_text="Todos"),
         ], alignment=MainAxisAlignment.SPACE_AROUND)
     )
+
+def rd_tipo_rubro_ics(tipo):
+    return RadioGroup(
+        ref=tipo,
+        value="%",
+        content=Row([
+            create_radio(value="0", label_text="Industria"),
+            create_radio(value="1", label_text="Comercio"),
+            create_radio(value="2", label_text="Servicio"),
+            create_radio(value="%", label_text="Todos"),
+        ], alignment=MainAxisAlignment.SPACE_AROUND)
+    )
+
+
+
+def rd_numero_firmas(tipo_res:Ref|None):
+    return RadioGroup(
+        ref=tipo_res,
+        value='0',
+        content=Column([
+            create_radio(value="1", label_text="1 Firma"),
+            create_radio(value="2", label_text="2 Firmas"),
+            create_radio(value="3", label_text="3 Firmas)"),
+        ],)
+    )
+
+def rd_tamanio_documento_pdf(tipo_res:Ref |None, value=None):
+    return RadioGroup(
+        
+        ref=tipo_res,
+        value=value,
+        content=Row([
+            create_radio_tipo(value="MediaCarta", label_text="Media Carta"),
+            create_radio_tipo(value="Carta", label_text="Carta"),
+            create_radio_tipo(value="OriginalCopiaCarta", label_text="(Orginal y Copia)"),
+        ],alignment=MainAxisAlignment.SPACE_EVENLY)
+    )
+
+def create_radio_tipo(value='0', label_text="") -> Container:
+
+    con = Container(
+        width=140,
+        height=30,
+        content=Column(
+            alignment=MainAxisAlignment.CENTER,
+            horizontal_alignment=CrossAxisAlignment.CENTER,
+            controls=[Radio(value=value,
+                 label=label_text,
+                 label_position=LabelPosition.CENTER,
+                 fill_color=color_check(),
+                 label_style=TextStyle(
+                     size=10, color=color_texto(), font_family="Tahoma")
+                 )]
+        )
+    )
+    return con
+
+

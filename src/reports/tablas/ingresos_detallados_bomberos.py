@@ -29,35 +29,21 @@ def tabla_ingreso_detallado_bomberos(datos, tipo_cta=0) -> Table:
             estilo_moneda = estilo_fila_moneda
             estilo_fila_nombre = estilo_fila
             no = str(int(index)+1)
-        if tipo_cta:
-            filas.append([
-                Paragraph(no, estilo_fila),
-                Paragraph(num, estilo_fila),
-                Paragraph(dni, estilo_fila),
-                Paragraph(f'{item["Nombre Completo"]}', estilo_fila_nombre),
-                Paragraph(f'{item["SALDO"]:,.2f}', estilo_moneda),
-                Paragraph(
-                    f'{item["RECUPERACION DE SALDOS"]:,.2f}',  estilo_moneda),
-                Paragraph(f'{item["RECARGOS"]:,.2f}',   estilo_moneda),
-                Paragraph(f'{item["INTERESES"]:,.2f}', estilo_moneda),
-                Paragraph(f'{item["TOTAL"]:,.2f}', estilo_moneda),
-            ])
-        else:
-            filas.append([
-                Paragraph(no, estilo_fila),
-                Paragraph(num, estilo_fila),
-                Paragraph(dni, estilo_fila),
-                Paragraph(f'{item["Nombre Completo"]}', estilo_fila_nombre),
-                Paragraph(f'{item["SALDO"]:,.2f}', estilo_moneda),
-                Paragraph(
-                    f'{item["RECUPERACION DE SALDOS"]:,.2f}',  estilo_moneda),
-                Paragraph(f'{item["TOTAL"]:,.2f}', estilo_moneda),
-            ])
-    if tipo_cta:
-        tabla = Table(filas, colWidths=[
+  
+        filas.append([
+            Paragraph(no, estilo_fila),
+            Paragraph(num, estilo_fila),
+            Paragraph(dni, estilo_fila),
+            Paragraph(f'{item["Nombre Completo"]}', estilo_fila_nombre),
+            Paragraph(f'{item["SALDO"]:,.2f}', estilo_moneda),
+            Paragraph(f'{item["RECUPERACION DE SALDOS"]:,.2f}',  estilo_moneda),
+            Paragraph(f'{item["INTERESES"]:,.2f}',  estilo_moneda),
+            Paragraph(f'{item["RECARGOS"]:,.2f}',  estilo_moneda),
+            Paragraph(f'{item["TOTAL"]:,.2f}', estilo_moneda),
+        ])
+   
+    tabla = Table(filas, colWidths=[
             30, 50, 80, 180, 70, 70, 70, 70, 70])
-    else:
-        tabla = Table(filas, colWidths=[
-            30, 50, 80, 180, 70, 70, 70])
+    
     tabla.setStyle(estilo_tabla)
     return tabla

@@ -6,6 +6,34 @@ border_color = color_borde()
 bg_color = color_bg_2()
 
 
+def dropbox_cuentas_ingreso(cuentas,  ref):
+    texto_color = color_texto()
+    border_color = color_borde()
+    bg_color = color_bg_2()
+    cuentas = cuentas
+
+    data_cta = [dropdown.Option(
+            data = a,
+            key=a["CtaIngreso"],
+            text=a["NombreCtaIngreso"],
+            text_style=TextStyle(
+                size=10, font_family="Tahoma", color=texto_color),
+            style=ButtonStyle(color=texto_color, text_style=TextStyle(
+                size=10, font_family="Tahoma", color=texto_color)))
+            for  a in cuentas]
+    return Dropdown(
+        ref=ref,
+        label="Seleccione la cuenta de ingreso",
+        width=300,
+        options=data_cta,
+        color=texto_color,
+        border_color=border_color,
+        bgcolor=bg_color,
+        label_style=TextStyle(
+            size=10, font_family="Tahoma", color=texto_color),
+        text_style=TextStyle(size=10, font_family="Tahoma", color=texto_color))
+
+
 def dropbox_aldeas(aldeas: list[dict], ref):
     texto_color = color_texto()
     border_color = color_borde()
@@ -20,7 +48,10 @@ def dropbox_aldeas(aldeas: list[dict], ref):
                 size=10, font_family="Tahoma", color=texto_color),
             style=ButtonStyle(color=texto_color, text_style=TextStyle(
                 size=10, font_family="Tahoma", color=texto_color)))
-            for a in aldeas]
+            for    
+            
+            
+            a in aldeas]
     return Dropdown(
         ref=ref,
         label="Seleccione la aldea",

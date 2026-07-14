@@ -57,6 +57,7 @@ def busqueda_identificacion(vista):
         cod_aldea = vista.cod_aldea.current.value
         if cod_aldea == "%":
             vista.nombre_aldea = "Todos Las Aldeas"
+            cod_aldea = None
         else:
             for fila in data_aldeas:
                 if fila['CodAldea'] == dropbox_aldea.value:
@@ -94,7 +95,7 @@ def busqueda_identificacion(vista):
     dropbox_aldea = dropbox_aldeas(data_aldeas, vista.cod_aldea)
     dropbox_aldea.width = 200
     dropbox_aldea.on_change = handle_aldea
-    data_barrio = vista.aldeas.obtener_barrio('%')
+    data_barrio = vista.aldeas.obtener_barrio()
     dropbox_barrio = dropbox_barrios(data_barrio, vista.cod_barrio)
     dropbox_barrio.width = 200
     dropbox_barrio.on_change = handle_barrio

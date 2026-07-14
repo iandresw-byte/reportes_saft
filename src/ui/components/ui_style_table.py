@@ -212,6 +212,22 @@ def estilos_parrafo():
         spaceAfter=15
     ))
     estilos.add(ParagraphStyle(
+        name='TituloMuniMedia',
+        fontSize=15,
+        alignment=1,  # centrado
+        #leading=35,
+        spaceAfter=1,
+        fontName="Malgun-Bold"
+    ))
+    estilos.add(ParagraphStyle(
+        name='TituloPrincipalMedia',
+        fontSize=20,
+        textColor=colors.black,
+        alignment=1,  # centrado
+        fontName="Jhenghei",
+        spaceAfter=2
+    ))
+    estilos.add(ParagraphStyle(
         name='Label',
         fontSize=11,
         textColor=colors.green,

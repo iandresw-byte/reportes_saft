@@ -866,6 +866,8 @@ def sumar_ingresos_bomberos_gobernacion(datos: DataFrame):
     # Sumar horizontalmente
     datos["Total_Resultado"] = datos[[
         "saldo",
+        "recargo",
+        "interes",
         "recuperacion"
     ]].sum(axis=1)
 
@@ -884,6 +886,8 @@ def sumar_ingresos_bomberos_gobernacion(datos: DataFrame):
         "SApellido": "",
         "saldo": datos["saldo"].sum(),
         "recuperacion": datos["recuperacion"].sum(),
+        "interes": datos["interes"].sum(),
+        "recargo": datos["recargo"].sum(),
         "NumRecibo": '',
         "Total_Resultado": datos["Total_Resultado"].sum(),
         "Nombre_Completo": "Total",
@@ -897,6 +901,8 @@ def sumar_ingresos_bomberos_gobernacion(datos: DataFrame):
                       "Nombre_Completo",
                       "saldo",
                       "recuperacion",
+                    "interes",
+                    "recargo",
                       "Total_Resultado"
                       ]]
     nuevo_df.columns = ["No. Recibo",
@@ -904,6 +910,8 @@ def sumar_ingresos_bomberos_gobernacion(datos: DataFrame):
                         "Nombre Completo",
                         "SALDO",
                         "RECUPERACION DE SALDOS",
+                        "INTERESES",
+                        "RECARGOS",
                         "TOTAL",
                         ]
 

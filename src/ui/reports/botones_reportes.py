@@ -20,6 +20,8 @@ def botones_mora(vista):
                      vista.abrir_modal_estratificacion_ine),
         create_boton("Estratificacion Declaraciones SAR",
                      vista.abrir_modal_estratificacion_sar),
+        create_boton("Abonados en Mora Por Tipo de Servicio",vista.abrir_modal_mora_abona_x_tipo),
+        create_boton("Establecimientos en Mora Por Actividad Economica",vista.abrir_modal_mora_comercio_x_tipo),
     ]
 
 

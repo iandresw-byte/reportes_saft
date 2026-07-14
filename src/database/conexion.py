@@ -2,7 +2,7 @@ from cryptography.fernet import Fernet
 import pyodbc
 import time
 from contextlib import contextmanager
-from cryptography.fernet import Fernet
+
 
 
 class ConexionBD:

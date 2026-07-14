@@ -2,12 +2,17 @@
 
 import os
 import asyncio
+from src.reports.pfds.rpt_abonados_x_servicio import RptAbonadosServicioReport
+from src.reports.excel.mora_abonados_sp import AbonadosServiciosExcelReport
+from src.reports.excel.mora_establecimientos import EstablecimientosExcelReport
+from src.reports.pfds.rpt_establecimientos_x_actividad import RptEstablecimientosActividadReport
 from src.reports.pfds.rpt_ingresos_depto_mensual import RptIngresosDeptoMensualReport
 from src.reports.excel.ingresos_depto_detallado_tributaria import IngresosDeptosDetalladosTributariaReport
 from src.reports.excel.ingresos_depto_detallado_justicia import IngresosDeptosDetalladosJusticiaReport
 from src.reports.excel.ingresos_depto_detallado_procamut import IngresosDeptosDetalladosProcamutReport
 from src.reports.excel.ingresos_depto_detallado_urbanismo import IngresosDeptosDetalladosUrbanismoReport
 from src.reports.excel.ingresos_depto_detallado_secretaria import IngresosDeptosDetalladosSecretariaReport
+
 from src.reports.excel.ingresos_depto_diario import IngresosDeptosDiarioReport
 from src.reports.pfds.rpt_ingresos_depto_general import RptIngresosDeptoGeneralReport
 from src.reports.pfds.rpt_ingresos_depto_diario import RptIngresosDeptoDiarioReport
@@ -132,6 +137,81 @@ async def generar_excel_mora_vs_ingresos(vista, e):
         tipo="excel"
     )
 
+
+async def generar_reporte_pdf_abonado_x_cuenta(vista, e):
+    cta_cuentas = vista.cuenta_sp
+    if not cta_cuentas:
+        snack_error_reporte(vista.page, "No hay Cuentas para mostar")
+        return
+    titulo_rpt = "Abonados de Servicios Publicos - Detalle de Mora Por Servicio"
+    vista.cerrar_modal()
+    await ejecutar_reporte(
+        vista,
+        e,
+        "abonados_por_servicio.pdf",
+        obtener_datos=lambda: vista.abonados_sp.get_abonado_x_servicio(cta_cuentas),
+        construir_reporte=lambda datos: RptAbonadosServicioReport(
+            datos, vista.datos_muni, vista.administracion,titulo_rpt
+        ),
+        tipo="pdf"
+    )
+
+async def generar_reporte_excel_abonado_x_cuenta(vista, e):
+    cta_cuentas = vista.cuenta_sp
+    if not cta_cuentas:
+        snack_error_reporte(vista.page, "No hay Cuentas para mostar")
+        return
+    titulo_rpt = "Abonados de Servicios Publicos - Detalle de Mora Por Servicio"
+    vista.cerrar_modal()
+    await ejecutar_reporte(
+        vista,
+        e,
+        "abonados_por_servicio.xlsx",
+        obtener_datos=lambda: vista.abonados_sp.get_abonado_x_servicio(cta_cuentas),
+        construir_reporte=lambda datos: AbonadosServiciosExcelReport(
+            datos, vista.datos_muni, titulo_rpt
+        ),
+        tipo="excel"
+    )
+
+async def generar_reporte_pdf_establecimiento_por_actividad(vista, e):
+    cta_cuentas = vista.cuenta_ics
+    if not cta_cuentas:
+        snack_error_reporte(vista.page, "No hay Cuentas para mostar")
+        return
+    titulo_rpt = "Establecimientos I.C.S. - Detalle de Mora por Actividad Economica"
+    vista.cerrar_modal()
+    await ejecutar_reporte(
+        vista,
+        e,
+        "rpt_mora_establecimientos_x_actividad.pdf",
+        obtener_datos=lambda: vista.rpt_establecimientos.get_rpt_mora_x_actividad(cta_actividad=cta_cuentas["CtaIngreso"]),
+        construir_reporte=lambda datos: RptEstablecimientosActividadReport(
+            datos, vista.datos_muni, vista.administracion,titulo_rpt
+        ),
+        tipo="pdf"
+    )
+
+async def generar_reporte_excel_establecimiento_por_actividad(vista, e):
+    cta_cuentas = vista.cuenta_ics
+
+    if not cta_cuentas:
+        snack_error_reporte(vista.page, "No hay Cuentas para mostar")
+        return
+    titulo_rpt = "Establecimientos I.C.S. - Detalle de Mora por Actividad Economica"
+
+    vista.cerrar_modal()
+
+    await ejecutar_reporte(
+        vista,
+        e,
+        "rpt_mora_establecimientos_x_actividad.xlsx",
+        obtener_datos=lambda: vista.rpt_establecimientos.get_rpt_mora_x_actividad(cta_actividad=cta_cuentas["CtaIngreso"]),
+        construir_reporte=lambda datos: EstablecimientosExcelReport(
+            datos, vista.datos_muni, titulo_rpt
+        ),
+        tipo="excel"
+    )
 
 async def generar_pdf_mora_vs_ingresos(vista, e):
     impuesto = vista.tipo_impuesto.current.value
@@ -321,7 +401,7 @@ async def generar_excel_estratificacion(vista, e):
         vista,
         e,
         "moral_vs_aldea_bi_anio.xlsx",
-        obtener_datos=lambda: vista.estratificacion.estratificacion(
+        obtener_datos=lambda: vista.rpt_establecimientos.estratificacion(
             tipo_empresa, anio),
         construir_reporte=lambda datos: EstratificacionReport(
             datos, vista.datos_muni, titulo_rpt
@@ -375,15 +455,11 @@ async def generar_analisis_ingresos(vista, e):
 
 
 async def anula_plan_pago(vista, e):
-    identidad = vista.identidad.current.value
-    num_plan_pago = vista.num_plan_pago.current.value
-    if not identidad:
-        snack_error_reporte(
-            vista.page, "debe de ingresar una identidad valida")
-        return
+ 
+    num_plan_pago = int(vista.num_plan_pago.current.value)
+
     vista.cerrar_modal()
-    vista.plan_pago.planes_de_pago(
-        identidad=identidad, num_plan_pago=num_plan_pago)
+    vista.plan_pago.anular_plan_de_pago(vista, num_plan_pago=num_plan_pago)
 
 
 async def generar_rpt_permiso_operacion_pdf(vista, e):

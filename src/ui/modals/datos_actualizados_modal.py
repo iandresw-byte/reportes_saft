@@ -9,8 +9,7 @@ def abrir_datos_actualizados(vista, e, titulo, mensaje):
     btn_salir = create_boton_salir_modal()
     btn_salir.on_click = lambda _: vista.cerrar_modal()
     txt_titulo = create_titulo_modal(titulo)
-    txt_sub_titulo = create_sub_titulo_modal(
-        mensaje)
+    txt_sub_titulo = create_sub_titulo_modal(mensaje)
     return ft.AlertDialog(
         modal=True,
         bgcolor=color_bg(),
@@ -32,5 +31,5 @@ def abrir_datos_actualizados(vista, e, titulo, mensaje):
         actions=[
             btn_salir
         ],
-        actions_alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+        actions_alignment=ft.MainAxisAlignment.CENTER,
     )

@@ -10,13 +10,13 @@ from io import BytesIO
 from src.ui.components.ui_style_table import estilos_parrafo
 
 
-class ApremioReport:
+class ApremioCartaSAMIReport:
     def __init__(self, lista_datos, municipio, titulo_reporte):
         self.lista_datos = lista_datos
         self.municipio = municipio
         self.titulo = titulo_reporte
         self.num_requerimiento = "1er"
-        self.margen = 1.27 * cm
+        self.margen = 0.70* cm
 
     def generar_pdf(self, ruta_salida):
         doc = SimpleDocTemplate(ruta_salida, pagesize=letter,
@@ -90,46 +90,39 @@ class ApremioReport:
 
             elementos.append(tabla_titulo)
 
-            periodo_fila = Paragraph(
-                f"<b>Periodo:</b> {contribuyente['periodo']}",
-                estilos["Normal"],
+            periodo_fila = Paragraph( f"<b>Periodo:</b> {contribuyente['periodo']}", estilos["Normal"], )
+            contribuyente_fila = Paragraph( f"<b>Contribuyente:</b> {contribuyente['nombre']}<br/>", estilos["Normal"],)
+            dni_fila = Paragraph( f"<b>DNI:</b> {contribuyente['dni']}<br/>", estilos["Normal"], )
+            direccion_fila = Paragraph( f"<b>Dirección:</b> {contribuyente['direccion']}<br/>", estilos["Normal"],)
+            clave_cata_fila = Paragraph( f"<b>Claves Catastrales:</b> {contribuyente['clave_catastro']}<br/>",  estilos["Normal"], )
+            num_requerimiento = Paragraph( f"<b>Requerimiento No.</b> {contribuyente['num_documeto']}<br/>",estilos["Normal"], )
+            fila = [periodo_fila, num_requerimiento]
+            tabla_periodo_num = Table(
+                [fila],
+                colWidths=[300, 270],  # ajusta según tus márgenes
             )
-            contribuyente_fila = Paragraph(
-                f"<b>Contribuyente:</b> {contribuyente['nombre']}<br/>",
-                estilos["Normal"],
+            fila = [contribuyente_fila, dni_fila]
+            tabla_nombre_dni = Table(
+                [fila],
+                colWidths=[300, 270],  # ajusta según tus márgenes
             )
-            dni_fila = Paragraph(
-                f"<b>DNI:</b> {contribuyente['dni']}<br/>",
-                estilos["Normal"],
+            fila = [ clave_cata_fila]
+            tabla_cata = Table(
+                [fila],
+                colWidths=[570],  # ajusta según tus márgenes
             )
-            direccion_fila = Paragraph(
-                f"<b>Dirección:</b> {contribuyente['direccion']}<br/>",
-                estilos["Normal"],
+            fila = [direccion_fila ]
+            tabla_ubicacion = Table(
+                [fila],
+                colWidths=[570],  # ajusta según tus márgenes
             )
-            clave_cata_fila = Paragraph(
-                f"<b>Claves Catastrales:</b> {contribuyente['clave_catastro']}<br/>",
-                estilos["Normal"],
-            )
-            num_requerimiento = Paragraph(
-                f"<b>Requerimiento No.</b> {contribuyente['num_documeto']}<br/>",
-                estilos["Normal"],
-            )
-            fila = [contribuyente_fila, num_requerimiento]
-            elementos.append(Spacer(1, 8))
-            elementos.append(contribuyente_fila)
-            elementos.append(Spacer(1, 5))
-            elementos.append(dni_fila)
-            elementos.append(Spacer(1, 5))
-            elementos.append(direccion_fila)
-            elementos.append(Spacer(1, 5))
-            elementos.append(clave_cata_fila)
-            elementos.append(Spacer(1, 5))
-            elementos.append(periodo_fila)
-            elementos.append(Spacer(1, 5))
-            elementos.append(num_requerimiento)
-            elementos.append(Spacer(1, 12))
+
+            elementos.append(tabla_nombre_dni)
+            elementos.append(tabla_periodo_num)
+            elementos.append(tabla_ubicacion)
+            elementos.append(tabla_cata)
             elementos.append(Paragraph(texto_parrafo, estilos["Normal"]))
-            elementos.append(Spacer(1, 12))
+            elementos.append(Spacer(1, 5))
 
             filas = [["Cuenta", "Descripción", "Monto (L)"]]
             total = 0
@@ -152,36 +145,35 @@ class ApremioReport:
 
             valores_firma = [
                 Paragraph("", estilo_personal["firma_apremio"]),
+                Paragraph("Administración Tributaria", estilo_personal["firma_apremio"]),
                 Paragraph("", estilo_personal["firma_apremio"]),
-                Paragraph("Administración Tributaria",
-                          estilo_personal["firma_apremio"]),
-                Paragraph("", estilo_personal["firma_apremio"]),
+                Paragraph("Firma Recibido Contribuyente", estilo_personal["firma_apremio"]),
                 Paragraph("", estilo_personal["firma_apremio"]),
             ]
 
             tabla_firma = Table(
                 [valores_firma],
-                colWidths=[50, 50, 200, 50, 50],
+                colWidths=[50, 200, 50, 200, 50],
             )
 
             tabla_firma.setStyle(TableStyle([
                 ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("LINEABOVE", (2, 0), (2, 0), 1, colors.black),
+                ("LINEABOVE", (1, 0), (1, 0), 1, colors.black),
+                ("LINEABOVE", (3, 0), (3, 0), 1, colors.black),
                 ("TOPPADDING", (0, 0), (-1, -1), 6),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
             ]))
             elementos.append(tabla)
 
-            elementos.append(Spacer(1, 12))
+            elementos.append(Spacer(1, 5))
             elementos.append(Paragraph(texto_pie, estilos["Normal"]))
-            elementos.append(Spacer(1, 12))
+            elementos.append(Spacer(1, 5))
             elementos.append(Paragraph(texto_nota, estilos["Normal"]))
-            elementos.append(Spacer(1, 12))
+            elementos.append(Spacer(1, 5))
             elementos.append(Paragraph(texto_fecha, estilos["Normal"]))
             elementos.append(Spacer(1, 30))
             elementos.append(tabla_firma)
-            elementos.append(Spacer(1, 5))
 
             # 🚨 Salto de página entre contribuyentes
             if index < len(self.lista_datos) - 1:

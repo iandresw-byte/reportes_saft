@@ -106,15 +106,10 @@ def abrir_modal_ver_apremio(vista, fila_data):
     #     estado2do.visible = False
     #     estado3er.visible = True
 
-    saldo_pagado = create_texFiel_fijas(
-        "Saldo Pagado", value=fila_data["Monto_pagado_formateado"])
-
-    tipo_impuesto = create_texFiel_fijas(
-        "Tipo Impuesto", value=fila_data["TipoImpDescripcionLong"])
-    txt_movimiento = create_texFiel_fijas(
-        "Movimientos", value=fila_data["estado"], read_only=True)
-    txt_observaciones = create_texFiel_fijas(
-        "Observaciones", value=fila_data["Observacion"].replace("|", "\n"), read_only=True)
+    saldo_pagado = create_texFiel_fijas( "Saldo Pagado", value=fila_data["Monto_pagado_formateado"])
+    tipo_impuesto = create_texFiel_fijas("Tipo Impuesto", value=fila_data["TipoImpDescripcionLong"])
+    txt_movimiento = create_texFiel_fijas( "Movimientos", value=fila_data["Estado"], read_only=True)
+    txt_observaciones = create_texFiel_fijas( "Observaciones", value=fila_data["Observacion"].replace("|", "\n"), read_only=True)
     txt_observaciones.multiline = True
     txt_observaciones.height = None
     fecha_generado = create_fecha(

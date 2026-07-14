@@ -1,6 +1,6 @@
 
-from src.utils.cuentas_apremio import clasificar_mora_gob
-from src.reports.apremio_report import ApremioReport
+from src.utils.cuentas_apremio_gob import clasificar_mora_gob
+
 from src.services.parametro_service import ParametroService
 from src.repositories.apremio_identificacion_repository import ApremioIdentifiacionRepository
 from src.repositories.apremio_repository import ApremioRepository
@@ -18,7 +18,7 @@ for loc in ["es_ES", "Spanish", "es-ES", "es_HN", "es_ES.UTF-8"]:
 class ApremioIdentificacionService:
     def __init__(self, conexion, sistem, usuario_sesion: Usuario | None):
         self.repo = ApremioIdentifiacionRepository(conexion)
-        self.repo_apremio = ApremioRepository(conexion)
+        self.repo_apremio = ApremioRepository(conexion, sistem=sistem)
         self.parametro_systema = ParametroService(conexion)
         self.sys = sistem
         self.user = usuario_sesion

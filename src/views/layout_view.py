@@ -9,7 +9,7 @@ from src.ui.PagosIP.vista import VistaPagosIP
 from src.views.no_disponible_view import VistaNoDisponible
 from src.ui.dashboard.vista_dashboard import VistaDashBoard
 from src.ui.constancias.vista import VistaConstancias
-from src.ui.ajustes_po.vista_ajustes import VistaAjustesPO
+from src.ui.ajustes.vista_ajustes import VistaAjustesPO
 from src.ui.PagosIP.eventos import file_picker_result
 from src.ui.components.ui_colors import color_bg, color_bg_2, color_shadow, color_texto
 from src.ui.components.ui_container import create_container_rail
@@ -19,26 +19,29 @@ class UILayout(ft.Container):
     def __init__(self, page: ft.Page, context, logger):
         super().__init__(expand=True)
         self._page = page
-
-        self.x_width = 900
-        self.x_height = 710
-        self._page.window.max_height = 1000000
-        self._page.window.min_height = 800
-        self._page.window.max_width = 10000
-        self._page.window.min_width = 1024
+        page.update()
+        self.x_width = 4200
+        self.x_height = 4200
+        self._page.window.max_height = self.x_height
+        self._page.window.min_height = None
+        self._page.window.max_width = self.x_width
+        self._page.window.min_width = None
+        page.update()
         self._page.window.maximizable = True
         self._page.window.minimizable = True
+        self._page.window.maximizable = True
         self._page.window.resizable = True
         self._page.title = "Reportes SAFT"
         self._page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self._page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         self._page.padding = 15
+        self._page.update()
         self.context = context
 
         self.context.init_saft()
 
         self._page.window.icon = "assets/images/icon.ico"
-        self._page.update()
+       
         text_color = color_texto()
         bg_color = color_bg()
         bg_2_color = color_bg_2()

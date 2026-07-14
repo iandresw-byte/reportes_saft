@@ -27,13 +27,13 @@ class BomberosRepository:
 
     def obtener_pagos_bomberos_detallado_gobernacion(self, fecha_inicio, fecha_fin):
         query = """
-                SELECT        c.DNI, c.Pnombre, c.SNombre, c.PApellido, c.SApellido, 
-                CAST(SUM(CASE WHEN rd.ctaingreso LIKE '11111806%' THEN rd.valorunitrecibodet + rd.descto + rd.desctoamni ELSE 0 END) AS FLOAT) AS saldo, 
-                CAST(SUM(CASE WHEN rd.ctaingreso LIKE '11212305%' THEN rd.valorunitrecibodet + rd.descto + rd.desctoamni ELSE 0 END) AS FLOAT) AS recuperacion, r.NumRecibo
+                SELECT        c.DNI, c.Pnombre, c.SNombre, c.PApellido, c.SApellido, CAST(SUM(CASE WHEN rd.ctaingreso LIKE '11111806%' THEN rd.valorunitrecibodet + rd.descto + rd.desctoamni ELSE 0 END) AS FLOAT) AS saldo, 
+                CAST(SUM(CASE WHEN rd.ctaingreso LIKE '11212305%' THEN rd.valorunitrecibodet + rd.descto + rd.desctoamni ELSE 0 END) AS FLOAT) AS recuperacion, CAST(SUM(rd.Recargo) AS FLOAT) AS recargo, CAST(SUM(rd.Interes) 
+                AS FLOAT) AS interes, r.NumRecibo
                 FROM            FC_03 AS c INNER JOIN
                 F_03 AS r ON c.DNI = r.DNI INNER JOIN
                 F_04 AS rd ON r.NumRecibo = rd.NumRecibo
-                WHERE        (r.FechaRecibo BETWEEN ? AND ?) AND (r.ReciboAnulado = 0) AND (SUBSTRING(rd.CtaIngreso, 1, 8) IN ('11111806', '11212305'))
+                WHERE        (SUBSTRING(rd.CtaIngreso, 1, 8) IN ('11111806', '11212305')) AND (r.FechaRecibo BETWEEN ? AND ?) AND (r.ReciboAnulado = 0)
                 GROUP BY c.DNI, c.Pnombre, c.SNombre, c.PApellido, c.SApellido, r.NumRecibo
                 ORDER BY c.DNI
         """

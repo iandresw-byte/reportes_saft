@@ -3,13 +3,17 @@
 import flet as ft
 from src.services.parametro_service import ParametroService
 from src.utils.config_manager import Config
-from src.ui.ajustes_po.evento_ajustes_po import file_picker_result, file_picker_result_reportes, habilitar_fields, actualizar, deshabilitar_fields
-from src.ui.ajustes_po.layout_ajustes_po import build_layout
-from src.ui.ajustes_po.fields_ajustes import btn_ruta_google, from_fiels_encargados, radios_predeterminados, botones, btn_ruta_carpeta_reportes
+from src.ui.ajustes.evento_ajustes_po import file_picker_result, file_picker_result_reportes, habilitar_fields, actualizar, deshabilitar_fields
+from src.ui.ajustes.layout_ajustes_po import build_layout
+
+from src.ui.ajustes.views.ajustes_apremio import VistaAjustesApremio
+from src.ui.ajustes.fields_ajustes import btn_ruta_google, from_fiels_encargados, radios_predeterminados, botones, btn_ruta_carpeta_reportes
 from src.ui.modals.datos_actualizados_modal import abrir_datos_actualizados
 from src.ui.components.ui_container import container_titulo, create_container
+from src.ui.components.ui_colors import color_texto, color_borde
 
-
+texto_color = color_texto()
+borde_color = color_borde()
 class VistaAjustesPO:
     def __init__(self, page, context):
         self.page = page
@@ -67,8 +71,41 @@ class VistaAjustesPO:
             self.reportes_ruta
         )
 
+        vista = VistaAjustesApremio(self.page, self.app)
+        self.lauout_apremio = vista.build()
+
     def build(self):
-        return self.layout
+        return ft.Tabs(
+            selected_index=0,
+            expand=1,
+            unselected_label_color=texto_color,
+            unselected_label_text_style=ft.TextStyle( size=12.5,  weight=ft.FontWeight.W_400),
+
+            label_color=texto_color,
+            label_text_style=ft.TextStyle( size=12.5,  weight=ft.FontWeight.W_800),
+
+            indicator_border_radius=0.5,
+            indicator_color=borde_color,
+            tabs=[
+
+
+                ft.Tab(
+                    text="AJUSTES DE PERSONAL ADMINISTRATIVO",
+                    content=self.layout
+                ),
+                ft.Tab(
+                    text="PROCESO DE APREMIO",
+                    content=self.lauout_apremio
+                ),
+                ft.Tab(
+                    text="IDENTIFIACION DE MORA",
+                   content=ft.Text("Ajustes Permido Operacion")
+                ),
+            ]
+        )
+
+
+    
 
     def _init_services(self):
         self.datos_muni = self.app.datos_muni

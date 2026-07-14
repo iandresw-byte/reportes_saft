@@ -68,3 +68,6 @@ def titulo_paragrap_pdf(municipio, titulo, estilo):
         f"{municipio['NombreMuni'].strip()} - {municipio['NombreDepto'].strip()}<br/><b>{titulo}</b>",
         estilo,
     )
+
+
+
