@@ -35,7 +35,7 @@ class VistaApremio:
     def __init__(self, page, context):
         self.page = page
         self.app = context
-        self.app.init_saft()
+    
 
         self.page.theme = ft.Theme(
             scrollbar_theme=ft.ScrollbarTheme(
@@ -163,7 +163,7 @@ class VistaApremio:
         
         self.pagina_actual = 1
         self.filas_por_pagina = 10
-        self.df = self.apremio.get_table_apremio()
+        self.df = []
         self.df_identificacion_mora_bi = []
         self.df_identificacion_mora_ics = []
         self.df_identificacion_mora_ip = []
@@ -261,7 +261,7 @@ class VistaApremio:
         self.tabla.update()
 
     def reiniciar_apremio(self, fila, e):
-        asyncio.run(reiniciar_primer_requerimiento(self, fila, e))
+        asyncio.run(reiniciar_primer_requerimiento(self, fila,self.app, e))
         self.tabla.update()
 
     def abrir_modal_ver(self, fila):
@@ -270,17 +270,17 @@ class VistaApremio:
         self.page.update()
 
     def generar_apremio_pdf_1er(self, e):
-        asyncio.run(generar_primer_requerimiento(self, e))
+        asyncio.run(generar_primer_requerimiento(self, self.app, e))
 
     def generar_apremio_pdf_individual(self, e):
         self.tipo_doc = 1
         print(self.identidad)
         if isinstance(e, str):
             self.identidad = e
-        asyncio.run(generar_primer_requerimiento_individual(self, e))
+        asyncio.run(generar_primer_requerimiento_individual(self,self.app, e))
 
     def generar_apremio_pdf_2do(self, e):
-        asyncio.run(generar_segundo_requerimiento(self, e))
+        asyncio.run(generar_segundo_requerimiento(self,self.app, e))
 
     def generar_apremio_certificacion(self, e):
         asyncio.run(generar_certificacion(self, e))

@@ -54,6 +54,17 @@ def table_style_UMA():
     )
 
 
+
+def table_estyle_aviso():
+    return TableStyle([
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#4F81BD")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (2, 1), (2, -1), "RIGHT"),
+                ("TOPPADDING", (0, 0), (-1, -1), 1),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
+            ])
 def columa_style():
     return ParagraphStyle(
         name="TablaColumnas",
@@ -73,6 +84,13 @@ def frima_estilo():
         alignment=1,  # justificado
     )
 
+def frima_estilo_aviso():
+    return ParagraphStyle(
+        name='Firma',
+        fontSize=8,
+        fontName="Century-Gothic",
+        alignment=1,  # justificado
+    )
 
 def fila_style():
     return ParagraphStyle(

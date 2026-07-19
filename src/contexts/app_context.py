@@ -5,7 +5,7 @@ from src.database.conexion import ConexionBD
 from src.models.usuario_model import Usuario
 from src.services.usuario_services import UsuarioService
 from src.utils.logger_config import configurar_logger
-
+from src.utils.config_manager import Config
 
 class AppContext:
     def __init__(self):
@@ -22,12 +22,14 @@ class AppContext:
         self.usuario_actual: Usuario = None  # type: ignore
         self.administracion: str = None  # type: ignore
         self.cod_muni = None
+        self.tamanio_documento: str = ""
         self.logger = configurar_logger(
             nombre_app="saft_app_bd",
             nivel=logging.INFO
         )
 
     def init_saft(self):
+        self.tamanio_documento = Config.obtener("APREMIO", "tipo_documento")
         if not self._conexion_saft:
             self._conexion_saft = ConexionBD('SAFT', self.logger)
             self._auth_service = UsuarioService( self._conexion_saft)
@@ -58,3 +60,6 @@ class AppContext:
     @property
     def administracion_service(self):
         return self._administracion_service
+
+    
+

@@ -4,6 +4,7 @@ import asyncio
 import logging
 import os
 import pandas as pd
+import flet as ft
 import webbrowser
 from src.utils.config_manager import Config
 from src.ui.components.ui_snack_bar import snack_error, snack_inicio, snack_rpt_generado
@@ -11,14 +12,14 @@ RESULTADO_DIR = Config.obtener("RUTAS", "carpeta_reportes")
 
 
 def snack_inicio_reporte(page, mensaje, e):
-    if not isinstance(e, str):
+    if isinstance(e, ft.ControlEvent ):
         e.control.disabled = False
     page.open(snack_inicio(mensaje))
     page.update()
 
 
 def snack_final_reporte(page, nombre, e):
-    if not isinstance(e, str):
+    if isinstance(e, ft.ControlEvent ):
         e.control.disabled = False
     page.open(snack_rpt_generado(nombre))
     page.update()
@@ -57,6 +58,8 @@ async def ejecutar_reporte(
         datos = obtener_datos()
 
         if isinstance(datos, pd.DataFrame):
+            is_data = len(datos) > 0
+        elif isinstance(datos, list):
             is_data = len(datos) > 0
         else:
             is_data = datos is not None

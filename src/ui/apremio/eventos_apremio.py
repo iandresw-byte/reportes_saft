@@ -7,7 +7,7 @@ from src.reports.pfds.apremio.apremio_media_carta_sami_report import ApremioMedi
 from src.reports.pfds.apremio.apremio_original_copia_gob_report import ApremioOriginalCopiaGobReport
 from src.reports.pfds.apremio.apremio_original_copia_sami_report import ApremioOriginalCopiaSAMIReport
 from flet import Ref
-from src.utils.config_manager import Config
+
 
 
 
@@ -16,7 +16,7 @@ from src.ui.reports.utils_reportes import (
     ejecutar_reporte)
 
 
-async def generar_primer_requerimiento(vista, e,):
+async def generar_primer_requerimiento(vista,app,  e,):
     tipo_impuesto = vista.tipo_impuesto.current.value
     tipo_persona = vista.tipo_persona.current.value
     cod_aldea = vista.cod_aldea.current.value
@@ -25,10 +25,11 @@ async def generar_primer_requerimiento(vista, e,):
     fecha_minima = vista.fecha_minima
     num_requerimientos = int(vista.num_avisos.current.value)
     tipo_cta_sami = bool(vista.datos_system["TpoCuenta"])
+    from src.utils.config_manager import Config
     TIPO_REPORTE = Config.obtener("APREMIO", "tipo_documento")
+    app.tamanio_documento
     
-    
-    if TIPO_REPORTE == "OriginalCopiaCarta":
+    if app.tamanio_documento == "OriginalCopiaCarta":
         if tipo_cta_sami:
             def reporte_apremio(datos): return ApremioOriginalCopiaSAMIReport(
                 datos, vista.datos_muni, "1er REQUERIMIENTO DE PAGO"
@@ -37,7 +38,7 @@ async def generar_primer_requerimiento(vista, e,):
             def reporte_apremio(datos): return ApremioOriginalCopiaGobReport(
                 datos, vista.datos_muni, "1er REQUERIMIENTO DE PAGO"
             )
-    elif TIPO_REPORTE == "MediaCarta":
+    elif app.tamanio_documento == "MediaCarta":
         if tipo_cta_sami:
             def reporte_apremio(datos): return ApremioMediaCartaSAMIReport(
                 datos, vista.datos_muni, "1er REQUERIMIENTO DE PAGO"
@@ -68,13 +69,14 @@ async def generar_primer_requerimiento(vista, e,):
     )
 
 
-async def generar_primer_requerimiento_individual(vista, e,):
+async def generar_primer_requerimiento_individual(vista,app, e,):
     if isinstance(vista.identidad ,Ref):
         vista.identidad = vista.identidad.current.value
+    from src.utils.config_manager import Config
     TIPO_REPORTE = Config.obtener("APREMIO", "tipo_documento")
 
     tipo_cta_sami = bool(vista.datos_system["TpoCuenta"])
-    if TIPO_REPORTE == "OriginalCopiaCarta":
+    if app.tamanio_documento == "OriginalCopiaCarta":
         if tipo_cta_sami:
             def reporte_apremio(datos): return ApremioOriginalCopiaSAMIReport(
                 datos, vista.datos_muni, "1er REQUERIMIENTO DE PAGO"
@@ -83,7 +85,7 @@ async def generar_primer_requerimiento_individual(vista, e,):
             def reporte_apremio(datos): return ApremioOriginalCopiaGobReport(
                 datos, vista.datos_muni, "1er REQUERIMIENTO DE PAGO"
             )
-    elif TIPO_REPORTE == "MediaCarta":
+    elif app.tamanio_documento == "MediaCarta":
         if tipo_cta_sami:
             def reporte_apremio(datos): return ApremioMediaCartaSAMIReport(
                 datos, vista.datos_muni, "1er REQUERIMIENTO DE PAGO"
@@ -114,11 +116,12 @@ async def generar_primer_requerimiento_individual(vista, e,):
     )
 
 
-async def generar_segundo_requerimiento(vista, e,):
+async def generar_segundo_requerimiento(vista,app, e,):
     tipo_impuesto = vista.tipo_impuesto.current.value
     tipo_persona = vista.tipo_persona.current.value
     cod_aldea = vista.cod_aldea.current.value
     cod_barrio = vista.cod_barrio.current.value
+    from src.utils.config_manager import Config
     TIPO_REPORTE = Config.obtener("APREMIO", "tipo_documento")
 
     if isinstance(vista.identidad ,Ref):
@@ -126,7 +129,7 @@ async def generar_segundo_requerimiento(vista, e,):
 
 
     tipo_cta_sami = bool(vista.datos_system["TpoCuenta"])
-    if TIPO_REPORTE == "OriginalCopiaCarta":
+    if app.tamanio_documento == "OriginalCopiaCarta":
         await ejecutar_reporte(
         vista,
         e,
@@ -139,7 +142,7 @@ async def generar_segundo_requerimiento(vista, e,):
         ),
         tipo="pdf"
     )
-    elif TIPO_REPORTE == "MediaCarta":
+    elif app.tamanio_documento == "MediaCarta":
          await ejecutar_reporte(
         vista,
         e,
@@ -191,17 +194,18 @@ async def generar_certificacion(vista, e,):
         "apremio_cerificacion.pdf",
         obtener_datos=lambda: vista.apremio.obtener_mora_gob(
             tipo_impuesto, tipo_persona, cod_aldea, cod_barrio, 3),
-        construir_reporte=lambda datos: ApremioReport(
+        construir_reporte=lambda datos: ApremioOriginalCopiaGobReport(
             datos, vista.datos_muni, "CERTIFICACION DE FALTA DE PAGO"
         ),
         tipo="pdf"
     )
 
 
-async def reiniciar_primer_requerimiento(vista, fila, e,):
+async def reiniciar_primer_requerimiento(vista, fila,app, e,):
+    from src.utils.config_manager import Config
     TIPO_REPORTE = Config.obtener("APREMIO", "tipo_documento")
     tipo_cta_sami = bool(vista.datos_system["TpoCuenta"])
-    if TIPO_REPORTE == "OriginalCopiaCarta":
+    if app.tamanio_documento == "OriginalCopiaCarta":
         if tipo_cta_sami:
             def reporte_apremio(datos): return ApremioOriginalCopiaSAMIReport(
                 datos, vista.datos_muni, "1er REQUERIMIENTO DE PAGO"
@@ -210,7 +214,7 @@ async def reiniciar_primer_requerimiento(vista, fila, e,):
             def reporte_apremio(datos): return ApremioOriginalCopiaGobReport(
                 datos, vista.datos_muni, "1er REQUERIMIENTO DE PAGO"
             )
-    elif TIPO_REPORTE == "MediaCarta":
+    elif app.tamanio_documento == "MediaCarta":
         if tipo_cta_sami:
             def reporte_apremio(datos): return ApremioMediaCartaSAMIReport(
                 datos, vista.datos_muni, "1er REQUERIMIENTO DE PAGO"
@@ -252,7 +256,10 @@ def obtener_contriuyente(vista):
 
 
 def obtener_contriuyente_proceso(vista):
-    dni = vista.identidad.current.value
+    if isinstance(vista.identidad, Ref):
+        dni = vista.identidad.current.value
+    else:
+        dni = vista.identidad
     data = vista.contribuente.obtener_datos_contribuyente_proceso(
         identidad=dni)
 

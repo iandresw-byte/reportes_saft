@@ -25,16 +25,17 @@ from src.services.analisis_ingresos_services import AnalisisIngresosService
 from src.services.establecimientos_services import EstablecimientosService
 from src.services.reportes_ingresos_deptos_services import RptIngresosDeptosService
 from src.services.reportes_sar_services import SARReportesService
+from src.services.registro_unico_services import RegistroUnicoService
 from src.ui.modals.estratificacion_modal import abrir_modal_estratificacion
 from src.ui.modals.modal_ingresos_depto import abrir_modal_rpt_ingresos_depto
 from src.ui.modals.modal_ingresos_depto_detallado import abrir_modal_rpt_ingresos_detallados_depto
 from src.ui.modals.modal_ingresos_depto_diarios import abrir_modal_rpt_ingresos_diarios_depto
 from src.ui.modals.modal_ingresos_depto_mensual import abrir_modal_rpt_ingresos_mensual_depto
 from src.ui.modals.reporte_permiso_operacion_modal import abrir_modal_rpt_permiso_operacion
-from src.ui.modals.rpt_sar_modal import abrir_modal_estratificacion_sar
+from src.ui.modals.rpt_sar_modal import abrir_modals_estratificacion_sar
 from src.ui.modals.trancicion_traspaso_modal import abrir_trancicicon_traspaso
 from src.ui.reports.layout_reportes import build_layout
-from src.ui.reports.botones_reportes import botones_mora, botones_otros, botones_ingresos
+from src.ui.reports.botones_reportes import botones_herramientas, botones_mora, botones_otros, botones_ingresos
 from src.ui.components.ui_container import container_titulo, create_container
 from src.ui.reports.eventos_reportes import (anula_plan_pago, generar_analisis_ingresos, generar_excel_estratificacion, generar_excel_estratificacion_sar,
                                              generar_mora_bi, generar_mora_bi_aldea_anio_excel,
@@ -45,15 +46,16 @@ from src.ui.reports.eventos_reportes import (anula_plan_pago, generar_analisis_i
                                              generar_reporte_pdf_ingreso_depto_detallado, generar_reporte_pdf_ingreso_depto_diario, generar_reporte_pdf_ingreso_depto_mensual,  generar_reporte_trancicicon,
                                              generar_reporte_trancicicon_det_amb, generar_reporte_trancicicon_det_bi,
                                              generar_reporte_trancicicon_det_ics, generar_reporte_trancicicon_det_ip,
-                                             generar_reporte_trancicicon_det_ist, generar_reporte_trancicicon_det_sp, generar_rpt_permiso_operacion_pdf)
+                                             generar_reporte_trancicicon_det_ist, generar_reporte_trancicicon_det_sp, generar_rpt_permiso_operacion_pdf, generar_tarjeta_unica)
 from src.ui.modals.mora_aldea_bi_modal import abrir_modal_mora_bi_aldea_anio
-from src.ui.modals.mora_vs_ingresos_aldea_modal import abrir_modal_mora_vs_ingresos
+from src.ui.modals.mora_vs_ingresos_aldea_modal import abrir_modal_mora_vs_ingreso
 from src.ui.components.analisi_ingresos_modal import abrir_analisis_ingresos
 from src.ui.modals.anula_pp_modal import abrir_anula_plan_pago
 from src.ui.modals.apremio_modal import abrir_modal_rpt_apremio_1er
 from src.ui.modals.modal_ingresos_bomberos import abrir_modal_rpt_bomberos
 from src.ui.modals.mora_abonados_por_servicio_modal import abrir_modal_abonados_x_servicio
 from src.ui.modals.mora_establecimientos_comerciales_rubro import abrir_modal_establecimientos_comerciales_rubro
+from src.ui.modals.tarjeta_unica_modal import abrir_tarjeta_unica
 
 
 class VistaReportes:
@@ -69,11 +71,13 @@ class VistaReportes:
         self.titulo_mora = container_titulo("REPORTES DE MORA")
         self.titulo_otros = container_titulo("OTROS REPORTES")
         self.titulo_ingresos = container_titulo("OTROS DE INGRESOS")
+        self.titulo_tools = container_titulo("HERRAMIENTAS")
 
         # botones
         self.contenedor_mora = create_container(botones_mora(self))
         self.contenedor_ingreso = create_container(botones_ingresos(self))
         self.contenedor_otros = create_container(botones_otros(self))
+        self.contenedor_tools = create_container(botones_herramientas(self))
 
         # layout
         self.layout = build_layout(
@@ -82,7 +86,9 @@ class VistaReportes:
             self.titulo_otros,
             self.contenedor_otros,
             self.contenedor_ingreso,
-            self.titulo_ingresos
+            self.titulo_ingresos,
+            self.contenedor_tools,
+            self.titulo_tools
         )
 
     def build(self):
@@ -109,6 +115,9 @@ class VistaReportes:
         self.aldeas = AldeaService(self.app.conexion_saft)
         self.abonados_sp = AbonadosSPService(self.app.conexion_saft)
         self.cta_ingresos = CuentasService(self.app.conexion_saft)
+
+        self.registro = RegistroUnicoService(self.app.conexion_saft)
+        
         
         
         self.mora_aldea = MoraAldeaService(
@@ -167,7 +176,7 @@ class VistaReportes:
 
     def abrir_modal_mora_vs_ingresos(self, e):
         self.tipo_impuesto = 0
-        self.dialog = abrir_modal_mora_vs_ingresos(self, e)
+        self.dialog = abrir_modal_mora_vs_ingreso(self, e)
         self.page.open(self.dialog)
         self.page.update()
 
@@ -188,7 +197,7 @@ class VistaReportes:
     def abrir_modal_estratificacion_sar(self, e):
         self.tipo_empresa = 0
         self.anio = ''
-        self.dialog = abrir_modal_estratificacion_sar(self, e)
+        self.dialog = abrir_modals_estratificacion_sar(self, e)
         self.page.open(self.dialog)
         self.page.update()
 
@@ -202,6 +211,14 @@ class VistaReportes:
         self.fecha_inicial = ''
         self.fecha_final = ''
         self.dialog = abrir_trancicicon_traspaso(self, e)
+        self.page.open(self.dialog)
+        self.page.update()
+
+    
+    def abril_modal_tarjeta_unica(self, e):
+    
+        self.identidad = ''
+        self.dialog = abrir_tarjeta_unica(self, e)
         self.page.open(self.dialog)
         self.page.update()
 
@@ -314,6 +331,9 @@ class VistaReportes:
         asyncio.run(generar_reporte_excel_establecimiento_por_actividad(self, e))
 
 
+    def generar_ver_tarjeta_unica(self, e):
+        asyncio.run(generar_tarjeta_unica(self, e))
+
     def generar_excel_aldea_mora(self, e):
         asyncio.run(generar_excel_mora_vs_ingresos(self, e))
 
@@ -344,27 +364,8 @@ class VistaReportes:
     def generar_rpt_trancicion_traspaso(self, e):
         asyncio.run(generar_reporte_trancicicon(self, e))
 
-    def generar_excel_ingreso_depto(self, e):
-        asyncio.run(generar_reporte_excel_ingreso_depto(self, e))
 
-    def generar_pdf_ingreso_depto(self, e):
-        asyncio.run(generar_reporte_pdf_ingreso_depto(self, e))
 
-    # 1 CATASTRO
-    def generar_excel_ingreso_depto_detallado_catastro(self, e):
-        asyncio.run(
-            generar_reporte_excel_ingreso_depto_detallado_catastro(self, e))
-
-    def generar_pdf_ingreso_depto_detallado_catastro(self, e):
-        asyncio.run(
-            generar_reporte_pdf_ingreso_depto_detallado_catastro(self, e))
-    # 3 AMBIENTE
-
-    def generar_excel_ingreso_depto_detallado_uma(self, e):
-        asyncio.run(generar_reporte_excel_ingreso_depto_detallado_uma(self, e))
-
-    def generar_pdf_ingreso_depto_detallado_uma(self, e):
-        asyncio.run(generar_reporte_pdf_ingreso_depto_detallado_uma(self, e))
 
     def anular_plan_pago(self, e):
         asyncio.run(anula_plan_pago(self, e))

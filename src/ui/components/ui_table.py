@@ -44,77 +44,78 @@ def table_requeridos(vista, df: DataFrame, pagina=1, filas_por_pagina=10) -> ft.
                 return df.iloc[inicio:fin]
 
     rows = []
-    df_pagina = obtener_pagina(df, pagina, filas_por_pagina)
-    if df is not None:
-        for _, row in df_pagina.iterrows():
-            color_fecha_entrega = color_estado_proceso(row["Estado"])
-            if row["Estado"] == EstadoApremio.PRONTO_VENCE.value:
-                str_fecha_entrega = f"{int(30 - row["DiasDesdeGenerado"])} dias para Vencer"
-            elif row["Estado"] == EstadoApremio.VENCIDO.value:
-                str_fecha_entrega = f"Reinicie el Proceso"
-            else:
-                str_fecha_entrega = row["FechaFormateadaEntrega"]
+    if isinstance(df, DataFrame):
+        df_pagina = obtener_pagina(df, pagina, filas_por_pagina)
+        if df is not None:
+            for _, row in df_pagina.iterrows():
+                color_fecha_entrega = color_estado_proceso(row["Estado"])
+                if row["Estado"] == EstadoApremio.PRONTO_VENCE.value:
+                    str_fecha_entrega = f"{int(30 - row["DiasDesdeGenerado"])} dias para Vencer"
+                elif row["Estado"] == EstadoApremio.VENCIDO.value:
+                    str_fecha_entrega = f"Reinicie el Proceso"
+                else:
+                    str_fecha_entrega = row["FechaFormateadaEntrega"]
 
-            if len(row["Observacion"]) > 20:
-                observacion = f"{row["Observacion"][:15]} mas..."
-            else:
-                observacion = row["Observacion"]
-            editar_visble = True
-            eliminar_visible = True
-            if row["Estado"] == 'Entregado':
-                editar_visble = False
-                eliminar_visible = False
+                if len(row["Observacion"]) > 20:
+                    observacion = f"{row["Observacion"][:15]} mas..."
+                else:
+                    observacion = row["Observacion"]
+                editar_visble = True
+                eliminar_visible = True
+                if row["Estado"] == 'Entregado':
+                    editar_visble = False
+                    eliminar_visible = False
 
-            rows.append(
-                ft.DataRow(
-                    cells=[
-                        ft.DataCell(create_text_table(
-                            str(row["IdDocumento"]))),
-                        ft.DataCell(create_text_table(row["DNI_Formateado"])),
-                        ft.DataCell(create_text_table(row["NombreCompleto"]),),
-                        ft.DataCell(create_text_table(
-                            str(row["Monto_ini_formateado"]))),
-                        ft.DataCell(create_text_table(
-                            row["TipoDocDescripcion"])),
-                        ft.DataCell(create_text_table(
-                            row["Estado"])),
-                        ft.DataCell(create_text_table(
-                            row["FechaFormateadaGenerada"])),
-                        ft.DataCell(create_text_table(
-                            str_fecha_entrega, color_fecha_entrega)),
-                        ft.DataCell(create_text_table(observacion)),
-                        ft.DataCell(
-                            ft.Row(
-                                [
-                                    ft.IconButton(
-                                        icon=ft.Icons.VISIBILITY,
-                                        tooltip="Ver",
-                                        data=row.to_dict(),
-                                        on_click=ver,
-                                    ),
-                                    ft.IconButton(
-                                        icon=ft.Icons.EDIT,
-                                        tooltip="Editar",
-                                        data=row.to_dict(),
-                                        on_click=editar,
-                                        visible=editar_visble,
-                                    ),
-                                    ft.IconButton(
-                                        icon=ft.Icons.DELETE,
-                                        tooltip="Anular Proceso",
-                                        data=row["IdDocumento"],
-                                        on_click=eliminar,
-                                        icon_color="red",
-                                        visible=eliminar_visible,
-                                    ),
-                                ],
-                                spacing=5,
-                                alignment=ft.MainAxisAlignment.CENTER
-                            )
-                        ),
-                    ]
+                rows.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(create_text_table(
+                                str(row["IdDocumento"]))),
+                            ft.DataCell(create_text_table(row["DNI_Formateado"])),
+                            ft.DataCell(create_text_table(row["NombreCompleto"]),),
+                            ft.DataCell(create_text_table(
+                                str(row["Monto_ini_formateado"]))),
+                            ft.DataCell(create_text_table(
+                                row["TipoDocDescripcion"])),
+                            ft.DataCell(create_text_table(
+                                row["Estado"])),
+                            ft.DataCell(create_text_table(
+                                row["FechaFormateadaGenerada"])),
+                            ft.DataCell(create_text_table(
+                                str_fecha_entrega, color_fecha_entrega)),
+                            ft.DataCell(create_text_table(observacion)),
+                            ft.DataCell(
+                                ft.Row(
+                                    [
+                                        ft.IconButton(
+                                            icon=ft.Icons.VISIBILITY,
+                                            tooltip="Ver",
+                                            data=row.to_dict(),
+                                            on_click=ver,
+                                        ),
+                                        ft.IconButton(
+                                            icon=ft.Icons.EDIT,
+                                            tooltip="Editar",
+                                            data=row.to_dict(),
+                                            on_click=editar,
+                                            visible=editar_visble,
+                                        ),
+                                        ft.IconButton(
+                                            icon=ft.Icons.DELETE,
+                                            tooltip="Anular Proceso",
+                                            data=row["IdDocumento"],
+                                            on_click=eliminar,
+                                            icon_color="red",
+                                            visible=eliminar_visible,
+                                        ),
+                                    ],
+                                    spacing=5,
+                                    alignment=ft.MainAxisAlignment.CENTER
+                                )
+                            ),
+                        ]
+                    )
                 )
-            )
 
     return ft.DataTable(
         columns=[
@@ -221,7 +222,7 @@ def table_identifiacion_top(vista, df: DataFrame, pagina=1, filas_por_pagina=10)
 def table_identifiacion_top_ics(vista, df: DataFrame, pagina=1, filas_por_pagina=10) -> ft.DataTable:
     def ver(e):
         fila = e.control.data
-        vista.abrir_modal_ver(fila)
+        vista.generar_apremio_pdf_individual(fila)
 
     def obtener_pagina(df, pagina=1, filas_por_pagina=10):
         inicio = (pagina - 1) * filas_por_pagina
@@ -234,6 +235,7 @@ def table_identifiacion_top_ics(vista, df: DataFrame, pagina=1, filas_por_pagina
     if isinstance(df, DataFrame):
         if df is not None:
             for index, row in df.iterrows():
+                print(row)
                 rows.append(
                     ft.DataRow(
                         cells=[
@@ -250,7 +252,7 @@ def table_identifiacion_top_ics(vista, df: DataFrame, pagina=1, filas_por_pagina
                                         ft.IconButton(
                                             icon=ft.Icons.VISIBILITY,
                                             tooltip="Ver",
-                                            data=row.to_dict(),
+                                            data=row["dni"],
                                             on_click=ver,
                                         ),
                                     ],

@@ -520,9 +520,10 @@ class ApremioService:
     def iniar_proceso_individual(self, data, tipo_doc, identidad=None):
         if data:
             dni = data["DNI"]
-        if identidad:
+        elif identidad:
             dni = identidad
-
+        else:
+            raise ValueError("No hay identidad")
         cod_aldea = '%'
         cod_barrio = '%'
         tipo_persona = '%'

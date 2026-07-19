@@ -63,7 +63,6 @@ class ConexionBD:
     def cerrar_conexion(self):
         if self.conexion:
             self.conexion.close()
-            self.log.info(f"Conexión {self.tipo_bd} cerrada correctamente.")
         else:
             self.log.info(f"No hay conexión activa para cerrar.")
 
@@ -74,7 +73,6 @@ class ConexionBD:
         try:
             yield cur
         except (pyodbc.Error) as e:
-            print(e)
             self.conexion.rollback()  # type: ignore
             self.log.error(f"Rollback realizado en {e} {self.tipo_bd}")
             self.reconectar()
@@ -83,7 +81,6 @@ class ConexionBD:
         except Exception as e:
             self.conexion.rollback()  # type: ignore
             self.log.error(f"Rollback realizado en {e} {self.tipo_bd}")
-            print(e)
             raise e
         finally:
             self.log.info(f"Conexión {self.tipo_bd} cerrada.")
@@ -97,11 +94,9 @@ class ConexionBD:
             try:
                 if exc_type is None:
                     self.conexion.commit()
-                    self.log.info(
-                        f"Commit realizado correctamente en {self.tipo_bd}")
+                
                 else:
                     self.conexion.rollback()
                     self.log.info(f"Rollback realizado en {self.tipo_bd}")
             finally:
                 self.conexion.close()
-                self.log.info(f"Conexión {self.tipo_bd} cerrada.")

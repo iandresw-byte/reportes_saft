@@ -12,7 +12,7 @@ from src.reports.excel.ingresos_depto_detallado_justicia import IngresosDeptosDe
 from src.reports.excel.ingresos_depto_detallado_procamut import IngresosDeptosDetalladosProcamutReport
 from src.reports.excel.ingresos_depto_detallado_urbanismo import IngresosDeptosDetalladosUrbanismoReport
 from src.reports.excel.ingresos_depto_detallado_secretaria import IngresosDeptosDetalladosSecretariaReport
-
+from src.reports.pfds.tarjeta_unica import TarjetaUnicaReport
 from src.reports.excel.ingresos_depto_diario import IngresosDeptosDiarioReport
 from src.reports.pfds.rpt_ingresos_depto_general import RptIngresosDeptoGeneralReport
 from src.reports.pfds.rpt_ingresos_depto_diario import RptIngresosDeptoDiarioReport
@@ -136,6 +136,28 @@ async def generar_excel_mora_vs_ingresos(vista, e):
         ),
         tipo="excel"
     )
+
+
+async def generar_tarjeta_unica(vista, e):
+    identidad = vista.identidad.current.value
+    titulo_rpt = "Tarjera Unica de Contribuyente"
+    if not identidad:
+        snack_error_reporte(vista.page, "Ingrese una Idetidad (Vacio)")
+        return
+
+    vista.cerrar_modal()
+
+    await ejecutar_reporte(
+        vista,
+        e,
+        "tarjeta_unica.pdf",
+        obtener_datos=lambda: vista.registro.obtener_ruc(identidad),
+        construir_reporte=lambda datos: TarjetaUnicaReport(
+            datos, vista.datos_muni,vista.administracion, titulo_rpt
+        ),
+        tipo="pdf"
+    )
+
 
 
 async def generar_reporte_pdf_abonado_x_cuenta(vista, e):

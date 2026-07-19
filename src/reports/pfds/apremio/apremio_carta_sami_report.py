@@ -1,3 +1,6 @@
+from pathlib import Path
+import sys
+
 import qrcode
 import os
 from reportlab.platypus import SimpleDocTemplate, Table, Image, TableStyle, Paragraph, Spacer, PageBreak
@@ -7,6 +10,10 @@ from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import letter
 from datetime import datetime
 from io import BytesIO
+from src.reports.pfds.apremio.crea_aviso import crear_aviso_carta
+from src.reports.utils.firmas_pdf import tabla_frima_admin_fima_recibido
+from src.reports.utils.logo_mun_pdf import logo_muni_imagen
+from src.reports.utils.tabla_titulo_pfd import titulo_horizontal, titulo_paragrap_pdf
 from src.ui.components.ui_style_table import estilos_parrafo
 
 
@@ -27,28 +34,30 @@ class ApremioCartaSAMIReport:
         elementos = []
         estilos = getSampleStyleSheet()
         ruta_base = r"C:\Program Files (x86)\SAFT\LogoMun"
-
-        if os.path.exists(ruta_base + ".png"):
-            ASSETS_DIR = ruta_base + ".png"
-        elif os.path.exists(ruta_base + ".jpeg"):
-            ASSETS_DIR = ruta_base + ".jpeg"
-        elif os.path.exists(ruta_base + ".jpg"):
-            ASSETS_DIR = ruta_base + ".jpg"
+        if getattr(sys, 'frozen', False):
+            BASE_DIR = Path(sys.executable).parent
         else:
-            ASSETS_DIR = None
-
-        if ASSETS_DIR:
-            logo_mun = Image(ASSETS_DIR, width=2.84*cm, height=2.52*cm)
-        else:
-            logo_mun = None
+            BASE_DIR = r"C:\Users\iAndresw\RepositorioLocal\reportes_saft"
+        
+        logo_mun = logo_muni_imagen(ruta_base)
+        firma_admin = ''
+        if self.municipio["CodMuni"] == "1807":
+            DIR_FIRMA= os.path.join(BASE_DIR,  "assets", "images","firma_tributaria.png")
+            LOGO_MUN= os.path.join(BASE_DIR, "assets", "images","logo_olanchito.png")
+            print(LOGO_MUN)
+            
+            if DIR_FIRMA:
+                firma_admin = Image(DIR_FIRMA, width=3*cm, height=2*cm)
+            else:
+                firma_admin = None
+        titulo = titulo_paragrap_pdf(
+            self.municipio, self.titulo, estilos["Title"])
+        
+        tabla_titulo = titulo_horizontal(titulo, logo_mun, None)
 
         estilo_personal = estilos_parrafo()
-        texto_parrafo = f"""
-                            Por este medio se le hace el {self.num_requerimiento} requerimiento de pago de los impuestos y servicios adeudados a esta municipalidad, a fin de que en el término de 30 días calendario, proceda a efectuar el pago del valor que se detalla a continuación
-                            """
-        texto_pie = f"""
-                            En caso de no atender este requerimiento en el plazo indicado, se procederá con el procedimiento administrativo correspondiente.
-                            """
+        texto_parrafo = f"""Por este medio se le hace el {self.num_requerimiento} requerimiento de pago de los impuestos y servicios adeudados a esta municipalidad, a fin de que en el término de 30 días calendario, proceda a efectuar el pago del valor que se detalla a continuación"""
+        texto_pie = f"""En caso de no atender este requerimiento en el plazo indicado, se procederá con el procedimiento administrativo correspondiente."""
         texto_nota = """ Intereses y recargos calculados hasta la fecha de este documento. Los valores indicados en este documento son referenciales y pueden variar al momento del pago."""
         texto_fecha = f"Emitido a los {datetime.now().day} días del mes de {datetime.now().strftime('%B')} del año {datetime.now().year}"
         for index, contribuyente in enumerate(self.lista_datos):
@@ -90,37 +99,9 @@ class ApremioCartaSAMIReport:
 
             elementos.append(tabla_titulo)
 
-            periodo_fila = Paragraph( f"<b>Periodo:</b> {contribuyente['periodo']}", estilos["Normal"], )
-            contribuyente_fila = Paragraph( f"<b>Contribuyente:</b> {contribuyente['nombre']}<br/>", estilos["Normal"],)
-            dni_fila = Paragraph( f"<b>DNI:</b> {contribuyente['dni']}<br/>", estilos["Normal"], )
-            direccion_fila = Paragraph( f"<b>Dirección:</b> {contribuyente['direccion']}<br/>", estilos["Normal"],)
-            clave_cata_fila = Paragraph( f"<b>Claves Catastrales:</b> {contribuyente['clave_catastro']}<br/>",  estilos["Normal"], )
-            num_requerimiento = Paragraph( f"<b>Requerimiento No.</b> {contribuyente['num_documeto']}<br/>",estilos["Normal"], )
-            fila = [periodo_fila, num_requerimiento]
-            tabla_periodo_num = Table(
-                [fila],
-                colWidths=[300, 270],  # ajusta según tus márgenes
-            )
-            fila = [contribuyente_fila, dni_fila]
-            tabla_nombre_dni = Table(
-                [fila],
-                colWidths=[300, 270],  # ajusta según tus márgenes
-            )
-            fila = [ clave_cata_fila]
-            tabla_cata = Table(
-                [fila],
-                colWidths=[570],  # ajusta según tus márgenes
-            )
-            fila = [direccion_fila ]
-            tabla_ubicacion = Table(
-                [fila],
-                colWidths=[570],  # ajusta según tus márgenes
-            )
-
-            elementos.append(tabla_nombre_dni)
-            elementos.append(tabla_periodo_num)
-            elementos.append(tabla_ubicacion)
-            elementos.append(tabla_cata)
+            original = crear_aviso_carta(self, contribuyente, "ORIGINAL")
+            elementos.extend(original)
+            elementos.append(Spacer(1, 5))
             elementos.append(Paragraph(texto_parrafo, estilos["Normal"]))
             elementos.append(Spacer(1, 5))
 
@@ -143,36 +124,16 @@ class ApremioCartaSAMIReport:
                 ("ALIGN", (2, 1), (2, -1), "RIGHT"),
             ]))
 
-            valores_firma = [
-                Paragraph("", estilo_personal["firma_apremio"]),
-                Paragraph("Administración Tributaria", estilo_personal["firma_apremio"]),
-                Paragraph("", estilo_personal["firma_apremio"]),
-                Paragraph("Firma Recibido Contribuyente", estilo_personal["firma_apremio"]),
-                Paragraph("", estilo_personal["firma_apremio"]),
-            ]
 
-            tabla_firma = Table(
-                [valores_firma],
-                colWidths=[50, 200, 50, 200, 50],
-            )
-
-            tabla_firma.setStyle(TableStyle([
-                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("LINEABOVE", (1, 0), (1, 0), 1, colors.black),
-                ("LINEABOVE", (3, 0), (3, 0), 1, colors.black),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-            ]))
+            tabla_firma = tabla_frima_admin_fima_recibido("","Administracion Tributaria","",firma_admin)
+            
             elementos.append(tabla)
-
-            elementos.append(Spacer(1, 5))
             elementos.append(Paragraph(texto_pie, estilos["Normal"]))
-            elementos.append(Spacer(1, 5))
+            elementos.append(Spacer(1, 1))
             elementos.append(Paragraph(texto_nota, estilos["Normal"]))
-            elementos.append(Spacer(1, 5))
+            elementos.append(Spacer(1, 1))
             elementos.append(Paragraph(texto_fecha, estilos["Normal"]))
-            elementos.append(Spacer(1, 30))
+            elementos.append(Spacer(1, 25))
             elementos.append(tabla_firma)
 
             # 🚨 Salto de página entre contribuyentes

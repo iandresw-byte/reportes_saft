@@ -51,3 +51,10 @@ def botones_otros(vista):
         create_boton("Detalle IST", vista.rpt_trancicion_det_ist),
         create_boton("Detalle SP", vista.rpt_trancicion_det_sp),
     ]
+
+
+def botones_herramientas(vista):
+    return [
+        create_boton("Tarjera Unica",
+                     vista.abril_modal_tarjeta_unica),
+  ]

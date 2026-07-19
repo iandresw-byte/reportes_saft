@@ -1,7 +1,11 @@
 import flet as ft
 
 
-def build_layout(titulo_mora, contenedor_mora, titulo_otros, contenedor_otros, contenedor_ingreso, titulo_ingresos):
+def build_layout(titulo_mora, contenedor_mora, 
+                 titulo_otros, contenedor_otros, 
+                 contenedor_ingreso, titulo_ingresos,
+                 contenedor_tools, titulo_tools,
+                 ):
 
     frame_mora_rpt = ft.Container(
         expand=True,
@@ -45,6 +49,20 @@ def build_layout(titulo_mora, contenedor_mora, titulo_otros, contenedor_otros, c
         )
     )
 
+    frame_tools = ft.Container(
+        expand=True,
+        alignment=ft.Alignment(0, 0),
+        content=ft.Column(
+            expand=True,
+            controls=[
+                titulo_tools,
+                contenedor_tools
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=20
+        )
+    )
+
     return ft.Container(
         expand=True,
         content=ft.Row(
@@ -54,7 +72,8 @@ def build_layout(titulo_mora, contenedor_mora, titulo_otros, contenedor_otros, c
             controls=[
                 frame_otros_rpt,
                 frame_ingresos_rpt,
-                frame_mora_rpt
+                frame_mora_rpt,
+                frame_tools
             ],
         )
     )

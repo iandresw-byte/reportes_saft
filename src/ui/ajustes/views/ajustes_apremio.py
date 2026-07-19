@@ -23,7 +23,7 @@ class VistaAjustesApremio:
         self.titulo_firmas = container_titulo("Firma Predeterminada Proceso de Apremio")
 
 
-        self.contenedor_tipos_tamanio = botones_tamanio_pdf(self.page)
+        self.contenedor_tipos_tamanio = botones_tamanio_pdf(self.page,self.app )
         self.contenedor_firmas = container_titulo("Firma Predeterminada Proceso de Apremio")
 
         self.layout = build_layout(

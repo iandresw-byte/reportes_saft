@@ -5,7 +5,7 @@ from src.ui.components.ui_text import create_sub_titulo_modal, create_titulo_mod
 from src.ui.components.ui_colors import color_bg
 
 
-def abrir_modal_mora_vs_ingresos(vista, e) -> ft.AlertDialog:
+def abrir_modal_mora_vs_ingreso(vista, e) -> ft.AlertDialog:
     vista.tipo_impuesto = ft.Ref[ft.RadioGroup]()
     radio_group = rd_tipo_factura(vista.tipo_impuesto)
     btn_excel = crear_boton_excel()

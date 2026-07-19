@@ -23,7 +23,8 @@ __all__=(
         'StyleSheet1',
         'getSampleStyleSheet',
         )
-from reportlab.lib.colors import black
+
+from reportlab.lib.colors import black, red, grey
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.lib.fonts import tt2ps
 from reportlab.rl_config import canvas_basefontname as _baseFontName, \
@@ -300,6 +301,31 @@ def getSampleStyleSheet():
     stylesheet.add(ParagraphStyle(name='Normal',
                                   fontName=_baseFontName,
                                   fontSize=8,
+                                  leading=8)
+                   )
+    stylesheet.add(ParagraphStyle(name='Normal_10',
+                                  fontName=_baseFontName,
+                                  fontSize=10,
+                                  leading=8)
+                   )
+
+    stylesheet.add(ParagraphStyle(name='Normal_rojo_bold',
+                                  fontName=_baseFontName,
+                                  fontSize=8,  # Fuente en negrita
+                                  textColor=red,                                  
+                                  leading=8)
+                   )
+    stylesheet.add(ParagraphStyle(name='Normal_rojo_bold_10',
+                                  fontName=_baseFontName,
+                                  fontSize=10,  # Fuente en negrita
+                                  textColor=red,                                  
+                                  leading=8)
+                   )
+
+    stylesheet.add(ParagraphStyle(name='Normal_grey_bold',
+                                  fontName=_baseFontName,
+                                  fontSize=8,  # Fuente en negrita
+                                  textColor=grey,                                  
                                   leading=8)
                    )
 

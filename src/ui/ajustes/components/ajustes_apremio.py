@@ -4,7 +4,7 @@ from src.ui.components.ui_radio import rd_numero_firmas, rd_tamanio_documento_pd
 from src.utils.config_manager import Config
 TIPO_REPORTE = Config.obtener("APREMIO", "tipo_documento")
 
-def botones_tamanio_pdf(vista):
+def botones_tamanio_pdf(vista, app):
     ref = ft.Ref[ft.RadioGroup]()
    
 
@@ -20,6 +20,7 @@ def botones_tamanio_pdf(vista):
         
         rd_tipo.value = tipo
         Config.guardar_tamanio_reporte(tipo)
+        app.tamanio_documento = tipo
         vista.update(rd_tipo)
         
         
