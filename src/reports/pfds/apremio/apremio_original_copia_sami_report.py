@@ -132,7 +132,14 @@ class ApremioOriginalCopiaSAMIReport:
         cc_original = Paragraph(f"Original: Contribuyente", estilos["Normal_grey_bold"])
         cc_copia = Paragraph(f"Copia: Archivo", estilos["Normal_grey_bold"])
         for index, contribuyente in enumerate(self.lista_datos):
-            qr_img = qrcode.make(contribuyente)
+            contribuyente_qr = { 
+                 "periodo":   contribuyente['periodo'],
+                 "nombre":   contribuyente['nombre'],
+                 "dni":   contribuyente['dni'],
+                 "direccion":   contribuyente['direccion'],
+                 "clave_catastro":   contribuyente['clave_catastro'],
+                 "num_documeto":   contribuyente['num_documeto']}
+            qr_img = qrcode.make(contribuyente_qr)
             buffer = BytesIO()
             qr_img.save(buffer, format="PNG")
             buffer.seek(0)

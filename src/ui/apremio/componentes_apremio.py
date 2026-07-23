@@ -15,12 +15,17 @@ bg_color = color_bg_2()
 
 def botones_apremio(vista):
     return [
-        # create_boton("Aviso de Cobro", ),
+        create_boton("Aviso de Cobro", vista.abril_modal_aviso_cobro),
         create_boton("1er Requerimiento", vista.abril_modal_apremio_1er),
         create_boton("2do Requerimiento", vista.abril_modal_apremio_2do),
-        create_boton("Certificaciones de Falta de Pago",
-                     vista.abril_modal_apremio_cerificacion),
-        dd_num_registros(vista)
+        create_boton("Certificaciones de Falta de Pago", vista.abril_modal_apremio_cerificacion),
+        ]
+
+def botones_apremio_table(vista):
+    return [
+        # create_boton("Aviso de Cobro", ),
+        create_boton("Cargar Tabla", vista.actualizar_tabla),
+         dd_num_registros(vista)
     ]
 
 

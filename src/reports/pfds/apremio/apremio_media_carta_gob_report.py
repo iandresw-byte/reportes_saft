@@ -64,7 +64,14 @@ class ApremioMediaCartaGobReport:
         texto_fecha = f"Emitido a los {datetime.now().day} días del mes de {datetime.now().strftime('%B')} del año {datetime.now().year}"
         
         for index, contribuyente in enumerate(self.lista_datos):
-            qr_img = qrcode.make(contribuyente)
+            contribuyente_qr = { 
+                 "periodo":   contribuyente['periodo'],
+                 "nombre":   contribuyente['nombre'],
+                 "dni":   contribuyente['dni'],
+                 "direccion":   contribuyente['direccion'],
+                 "clave_catastro":   contribuyente['clave_catastro'],
+                 "num_documeto":   contribuyente['num_documeto']}
+            qr_img = qrcode.make(contribuyente_qr)
             buffer = BytesIO()
             qr_img.save(buffer, format="PNG")
             buffer.seek(0)
@@ -77,19 +84,19 @@ class ApremioMediaCartaGobReport:
             tabla_duo = tabla_aviso_mora_media_carta(contribuyente["mora"])
             tabla_firma = tabla_frima_admin_fima_recibido("","Administracion Tributaria","",firma_admin)
             elementos.append(tabla_titulo)
-            elementos.append(Spacer(1, 15))
+            elementos.append(Spacer(1, 10))
             elementos.extend(original)
-            elementos.append(Spacer(1, 8))
+            elementos.append(Spacer(1, 2))
             elementos.append(Paragraph(texto_parrafo, estilos["Normal"]))
-            elementos.append(Spacer(1, 4))
+            elementos.append(Spacer(1, 2))
             elementos.append(tabla_duo)
-            elementos.append(Spacer(1, 4))
+            elementos.append(Spacer(1, 2))
             elementos.append(Paragraph(texto_pie, estilos["Normal"]))
             elementos.append(Paragraph(texto_nota, estilos["Normal"]))
             elementos.append(Paragraph(texto_fecha, estilos["Normal"]))
-            elementos.append(Spacer(1, 25))
+            elementos.append(Spacer(1, 20))
             elementos.append(tabla_firma)
-            elementos.append(Spacer(1, 4))
+            elementos.append(Spacer(1, 2))
             elementos.append(cc_original)
             if index < len(self.lista_datos) - 1:
                 elementos.append(PageBreak())

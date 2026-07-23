@@ -3,12 +3,12 @@ from reportlab.lib.styles import StyleSheet1
 from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle
 
-
+color_colum_name =colors.HexColor("#4F81BD")
 def table_style():
     return TableStyle(
         [
             # Encabezado
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#4F81BD")),
+            ("BACKGROUND", (0, 0), (-1, 0), color_colum_name),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
             ("BOTTOMPADDING", (0, 0), (-1, 0), 10),
@@ -31,7 +31,6 @@ def table_style():
         ]
     )
 
-
 def table_style_UMA():
     return TableStyle(
         [
@@ -53,8 +52,6 @@ def table_style_UMA():
         ]
     )
 
-
-
 def table_estyle_aviso():
     return TableStyle([
                 ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
@@ -65,6 +62,26 @@ def table_estyle_aviso():
                 ("TOPPADDING", (0, 0), (-1, -1), 1),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
             ])
+
+def table_estyle_aviso_gob_media_carta():
+    return TableStyle([
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#4F81BD")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTSIZE", (0, 0), (-1, -1), 7),
+                ("ALIGN", (2, 1), (2, -1), "RIGHT"),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ])
+
+def table_estyle_aviso_gob_carta():
+    return TableStyle([
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("BACKGROUND", (0, 0), (-1, 0), color_colum_name),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("ALIGN", (2, 1), (2, -1), "RIGHT"),
+            ])
+
 def columa_style():
     return ParagraphStyle(
         name="TablaColumnas",
@@ -74,7 +91,6 @@ def columa_style():
         leading=10,   # espacio entre líneas
         alignment=1,  # 0=izq, 1=centro, 2=derecha
     )
-
 
 def frima_estilo():
     return ParagraphStyle(
@@ -102,6 +118,15 @@ def fila_style():
         alignment=1,  # 0=izq, 1=centro, 2=derecha
     )
 
+def fila_style_descripcion():
+    return ParagraphStyle(
+        name="FilaColumnas",
+        textColor=colors.black,
+        fontName="Helvetica",
+        fontSize=8,
+        leading=10,   # espacio entre líneas
+        alignment=0,  # 0=izq, 1=centro, 2=derecha
+    )
 
 def fila_style_moneda():
     return ParagraphStyle(
@@ -113,7 +138,6 @@ def fila_style_moneda():
         alignment=2,  # 0=izq, 1=centro, 2=derecha
     )
 
-
 def fila_style_moneda_total():
     return ParagraphStyle(
         name="FilaColumnasMonedaTotal",
@@ -123,7 +147,6 @@ def fila_style_moneda_total():
         leading=10,   # espacio entre líneas
         alignment=2,  # 0=izq, 1=centro, 2=derecha
     )
-
 
 def estilos_licencia_uma():
     estilos = StyleSheet1()
@@ -209,7 +232,6 @@ def estilos_licencia_uma():
         alignment=1
     ))
     return estilos
-
 
 def estilos_parrafo():
     estilos = StyleSheet1()
@@ -488,7 +510,6 @@ def estilos_parrafo():
                 ))
     return estilos
 
-
 def table_per_ope():
     return TableStyle([
         ("ALIGN", (0, 0), (-1, -1), "LEFT"),
@@ -505,7 +526,6 @@ def table_per_ope():
         ("BACKGROUND", (4, 1), (4, -1), colors.whitesmoke),
     ])
 
-
 def table_per_ope_2():
     return TableStyle([
         ("ALIGN", (0, 0), (-1, -1), "LEFT"),
@@ -519,7 +539,6 @@ def table_per_ope_2():
         ("BACKGROUND", (1, 1), (1, -1), colors.transparent),
         ("BACKGROUND", (2, 1), (2, -1), colors.whitesmoke),
     ])
-
 
 def table_fecha_lateral():
     return TableStyle([

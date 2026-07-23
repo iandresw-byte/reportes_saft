@@ -136,7 +136,14 @@ class ApremioOriginalCopiaGobReport:
         cc_original = Paragraph(f"Original: Contribuyente", estilos["Normal_grey_bold"])
         cc_copia = Paragraph(f"Copia: Archivo", estilos["Normal_grey_bold"])
         for index, contribuyente in enumerate(self.lista_datos):
-            qr_img = qrcode.make(contribuyente)
+            contribuyente_qr = { 
+                 "periodo":   contribuyente['periodo'],
+                 "nombre":   contribuyente['nombre'],
+                 "dni":   contribuyente['dni'],
+                 "direccion":   contribuyente['direccion'],
+                 "clave_catastro":   contribuyente['clave_catastro'],
+                 "num_documeto":   contribuyente['num_documeto']}
+            qr_img = qrcode.make(contribuyente_qr)
             buffer = BytesIO()
             qr_img.save(buffer, format="PNG")
             buffer.seek(0)
@@ -149,17 +156,17 @@ class ApremioOriginalCopiaGobReport:
             tabla_duo = tabla_aviso_mora_media_carta(contribuyente["mora"])
             tabla_firma = tabla_frima_admin_fima_recibido("","Administracion Tributaria","",firma_admin)
             elementos.append(tabla_titulo)
-            elementos.append(Spacer(1, 15))
-            elementos.extend(original)
             elementos.append(Spacer(1, 8))
+            elementos.extend(original)
+            elementos.append(Spacer(1, 4))
             elementos.append(Paragraph(texto_parrafo, estilos["Normal"]))
-            elementos.append(Spacer(1, 4))
+            elementos.append(Spacer(1, 2))
             elementos.append(tabla_duo)
-            elementos.append(Spacer(1, 4))
+            elementos.append(Spacer(1, 2))
             elementos.append(Paragraph(texto_pie, estilos["Normal"]))
             elementos.append(Paragraph(texto_nota, estilos["Normal"]))
             elementos.append(Paragraph(texto_fecha, estilos["Normal"]))
-            elementos.append(Spacer(1, 25))
+            elementos.append(Spacer(1, 20))
             elementos.append(tabla_firma)
             elementos.append(cc_original)
             elementos.append(Spacer(1, 1))
@@ -167,19 +174,17 @@ class ApremioOriginalCopiaGobReport:
             elementos.append(FrameBreak())
 
             elementos.append(tabla_titulo)
-            elementos.append(Spacer(1, 15))
+            elementos.append(Spacer(1, 8))
             elementos.extend(copia)
-            elementos.append(Spacer(1, 8))
+            elementos.append(Spacer(1, 4))
             elementos.append(Paragraph(texto_parrafo, estilos["Normal"]))
-            elementos.append(Spacer(1, 8))
+            elementos.append(Spacer(1, 2))
             elementos.append(tabla_duo)
-            elementos.append(Spacer(1, 8))
+            elementos.append(Spacer(1, 2))
             elementos.append(Paragraph(texto_pie, estilos["Normal"]))
-            elementos.append(Spacer(1, 4))
             elementos.append(Paragraph(texto_nota, estilos["Normal"]))
-            elementos.append(Spacer(1, 4))
             elementos.append(Paragraph(texto_fecha, estilos["Normal"]))
-            elementos.append(Spacer(1, 25))
+            elementos.append(Spacer(1, 20))
             elementos.append(tabla_firma)
             elementos.append(cc_original)
             elementos.append(Spacer(1, 1))

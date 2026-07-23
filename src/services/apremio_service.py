@@ -6,10 +6,10 @@ import pandas as pd
 from src.models.usuario_model import Usuario
 from src.repositories.apremio_repository import ApremioRepository, ApremioDetalle, ApremioAvPg, ApremioEnDoc, EstadoApremio, ApremioRelacion
 from src.services.parametro_service import ParametroService
-
+from src.services.utils.manejar_informacion import get_tipo_impuesto
 from src.utils.cuentas_apremio_gob import clasificar_mora_gob
 from src.utils.cuentas_apremio_sami import clasificar_mora_sami
-
+from src.services.utils.limpiar_data import limpar_bienes_inmuebles
 
 class ApremioService:
     def __init__(self, conexion, sistem, usuario_sesion: Usuario | None):
@@ -19,29 +19,9 @@ class ApremioService:
         self.user = usuario_sesion
         self.data_ordenada = []
 
-    def get_tipo_impuesto(self, tipo_impuesto=None):
-        if tipo_impuesto == '%':
-            return "Impuestos, Tasas y Servicios Municipales"
-        elif tipo_impuesto == '0':
-            return "Otras Tasas y Servicios Municipales"
-        elif tipo_impuesto == '1':
-            return "Impuestos Sobre Bienes Inmuebles"
-        elif tipo_impuesto == '2':
-            return "Impuesto de Sobre Industria, Comercio y Servicio"
-        elif tipo_impuesto == '3':
-            return "Tasas de Permiso de Operacion"
-        elif tipo_impuesto == '4':
-            return "Impuesto Personal"
-        elif tipo_impuesto == '5':
-            return "Servicios Publicos Municipales"
-        elif tipo_impuesto == '7':
-            return "Planes de Pago"
-        else:
-            return "Otros No Clasificados"
-
-    def obtener_mora_gob(self, tipo_impuesto='%', tipo_persona="%", cod_aldea='%', cod_barrio='%', tipo_doc=1, num_requerimiento=10, mora_minima=0.0, fecha_min=None):
+    def obtener_mora_apremio(self, tipo_impuesto='%', tipo_persona="%", cod_aldea='%', cod_barrio='%', tipo_doc=1, num_requerimiento=10, mora_minima=0.0, fecha_min=None):
         self.data_ordenada = []
-        titulo_impuesto = self.get_tipo_impuesto(tipo_impuesto)
+        titulo_impuesto =get_tipo_impuesto(tipo_impuesto)
         if tipo_doc == 1:
             dato_apremio = self.repo.obtener_1er_requerimiento(tipo_impuesto=tipo_impuesto,
                                                                tipo_persona=tipo_persona,
@@ -77,6 +57,9 @@ class ApremioService:
                                                                tipo_persona=tipo_persona,
                                                                cod_aldea=cod_aldea,
                                                                cod_barrio=cod_barrio)
+        datos = pd.DataFrame(dato_apremio)
+        limpar_bienes_inmuebles(datos)
+
         for dato in dato_apremio:
             if self.sys["TpoCuenta"]:
                 mora = clasificar_mora_sami(dato, tipo_impuesto)
@@ -99,23 +82,23 @@ class ApremioService:
 
             if tipo_doc == 1:
                 self.insert_apremio_enc(
-                    dato['DNI'], tipo_imp, num_documeto, cod_barrio, dato['total'])
+                    dato['DNI'], tipo_imp, num_documeto,  dato['CodBarrio'], dato['total'])
 
             elif tipo_doc == 2:
                 id_doc = mapa_ids.get(dato['DNI'])
                 self.insert_apremio_enc(
-                    dato['DNI'], tipo_imp, num_documeto, cod_barrio, dato['total'], tipo_doc)
+                    dato['DNI'], tipo_imp, num_documeto, dato['CodBarrio'], dato['total'], tipo_doc)
                 self.insertar_relacion_doc(num_documeto, tipo_doc, id_doc)
 
             elif tipo_doc == 3:
                 id_doc = mapa_ids_2do.get(dato['DNI'])
                 self.insert_apremio_enc(
-                    dato['DNI'], tipo_imp, num_documeto, cod_barrio, dato['total'], tipo_doc)
+                    dato['DNI'], tipo_imp, num_documeto, dato['CodBarrio'], dato['total'], tipo_doc)
                 self.insertar_relacion_doc(num_documeto, tipo_doc, id_doc)
 
             else:
                 self.insert_apremio_enc(
-                    dato['DNI'], tipo_imp, num_documeto, cod_barrio, dato['total'])
+                    dato['DNI'], tipo_imp, num_documeto, dato['CodBarrio'], dato['total'])
 
             self.insert_factura(dato['DNI'], tipo_impuesto, num_documeto)
             self.insert_apremio_detalle(
@@ -123,9 +106,105 @@ class ApremioService:
             self.data_ordenada.append(fila)
         # self.generar_pdf_apremio(titulo=titulo_impuesto)
         return self.data_ordenada
+    
 
-    def obtener_mora_sami(self, tipo_impuesto: None, tipo_persona: None):
-        pass
+
+    def obtener_mora_gob(self, tipo_impuesto='%', tipo_persona="%", cod_aldea='%', cod_barrio='%', tipo_doc=1, num_requerimiento=10, mora_minima=0.0, fecha_min=None):
+        self.data_ordenada = []
+        titulo_impuesto =get_tipo_impuesto(tipo_impuesto)
+        if tipo_doc == 0:
+            dato_apremio = self.repo.obtener_1er_requerimiento(tipo_impuesto=tipo_impuesto,
+                                                               tipo_persona=tipo_persona,
+                                                               cod_aldea=cod_aldea,
+                                                               cod_barrio=cod_barrio,
+                                                               num_req=num_requerimiento,
+                                                               mora_minima=mora_minima,
+                                                               fecha_minia=fecha_min)
+        elif tipo_doc == 1:
+                    dato_apremio = self.repo.obtener_1er_requerimiento(tipo_impuesto=tipo_impuesto,
+                                                                       tipo_persona=tipo_persona,
+                                                                       cod_aldea=cod_aldea,
+                                                                       cod_barrio=cod_barrio,
+                                                                       num_req=num_requerimiento,
+                                                                       mora_minima=mora_minima,
+                                                                       fecha_minia=fecha_min)
+        elif tipo_doc == 2:
+            dato_apremio = self.repo.obtener_2do_requerimiento(tipo_impuesto=tipo_impuesto,
+                                                               tipo_persona=tipo_persona,
+                                                               cod_aldea=cod_aldea,
+                                                               cod_barrio=cod_barrio)
+            data_1er_requerimiento = self.repo.otener_ids_docuemtos(
+                EstadoApremio.ENTREGADO.value, 1, tipo_impuesto)
+            mapa_ids = {
+                item["Identidad"]: item["IdDocumento"]
+                for item in data_1er_requerimiento
+            }
+        elif tipo_doc == 3:
+            dato_apremio = self.repo.obtener_certificacion(tipo_impuesto=tipo_impuesto,
+                                                           tipo_persona=tipo_persona,
+                                                           cod_aldea=cod_aldea,
+                                                           cod_barrio=cod_barrio)
+            data_2do_requerimiento = self.repo.otener_ids_docuemtos(
+                EstadoApremio.ENTREGADO.value, 2, tipo_impuesto)
+            mapa_ids_2do = {
+                item["Identidad"]: item["IdDocumento"]
+                for item in data_2do_requerimiento
+            }
+        else:
+            dato_apremio = self.repo.obtener_2do_requerimiento(tipo_impuesto=tipo_impuesto,
+                                                               tipo_persona=tipo_persona,
+                                                               cod_aldea=cod_aldea,
+                                                               cod_barrio=cod_barrio)
+        datos = pd.DataFrame(dato_apremio)
+        #limpar_bienes_inmuebles(datos)
+
+        for dato in dato_apremio:
+            if self.sys["TpoCuenta"]:
+                mora = clasificar_mora_sami(dato, tipo_impuesto)
+            else:
+                mora = clasificar_mora_gob(dato, tipo_impuesto)
+            num_documeto = self.repo.get_num_documento()
+            fila = {'dni': dato['DNI'],
+                    'nombre': dato['Pnombre'] + ' ' + dato['SNombre'] + ' ' + dato['PApellido'] + ' ' + dato['SApellido'],
+                    'direccion': dato['Direccion'],
+                    'clave_catastro': dato['ClavesCatastro'],
+                    'periodo': f"{dato['mes_ini'].strftime("%d-%m-%Y")} - {dato['mes_fin'].strftime("%d-%m-%Y")}",
+                    "saldo": dato['total'],
+                    "mora": mora,
+                    "num_documeto": num_documeto
+                    }
+            if tipo_impuesto != '%':
+                tipo_imp = int(tipo_impuesto)
+            else:
+                tipo_imp = "%"
+
+            if tipo_doc == 1:
+                self.insert_apremio_enc(
+                    dato['DNI'], tipo_imp, num_documeto, dato['CodBarrio'], dato['total'])
+
+            elif tipo_doc == 2:
+                id_doc = mapa_ids.get(dato['DNI'])
+                self.insert_apremio_enc(
+                    dato['DNI'], tipo_imp, num_documeto, dato['CodBarrio'], dato['total'], tipo_doc)
+                self.insertar_relacion_doc(num_documeto, tipo_doc, id_doc)
+
+            elif tipo_doc == 3:
+                id_doc = mapa_ids_2do.get(dato['DNI'])
+                self.insert_apremio_enc(
+                    dato['DNI'], tipo_imp, num_documeto, dato['CodBarrio'], dato['total'], tipo_doc)
+                self.insertar_relacion_doc(num_documeto, tipo_doc, id_doc)
+
+            else:
+                print("creo que es aviso")
+            if tipo_doc != 0:
+                self.insert_factura(dato['DNI'], tipo_impuesto, num_documeto)
+                self.insert_apremio_detalle(
+                    dato['DNI'], tipo_imp, num_documeto)
+            self.data_ordenada.append(fila)
+        # self.generar_pdf_apremio(titulo=titulo_impuesto)
+        return self.data_ordenada
+
+
 
  
 
@@ -416,6 +495,7 @@ class ApremioService:
     def reinicar_proceso(self, data):
         self.repo.eliminar_factura(data["IdDocumento"])
         self.repo.eliminar_detalle(data["IdDocumento"])
+        num_proceso = data["IdDocumento"]
         cod_aldea = data["CodAldea"]
         cod_barrio = data['CodBarrio']
         if data['Tipo']:
@@ -456,7 +536,7 @@ class ApremioService:
                 mora = clasificar_mora_sami(dato,  data['TipoImpuesto'])
             else:
                 mora = clasificar_mora_gob(dato,  data['TipoImpuesto'])
-            num_documeto = self.repo.get_num_documento()
+          
             fila = {'dni': dato['DNI'],
                     'nombre': dato['Pnombre'] + ' ' + dato['SNombre'] + ' ' + dato['PApellido'] + ' ' + dato['SApellido'],
                     'direccion': dato['Direccion'],
@@ -464,17 +544,9 @@ class ApremioService:
                     'periodo': f"{dato['mes_ini'].strftime("%d-%m-%Y")} - {dato['mes_fin'].strftime("%d-%m-%Y")}",
                     "saldo": dato['total'],
                     "mora": mora,
-                    "num_documeto": num_documeto
+                    "num_documeto": num_proceso
                     }
-            if data['TipoImpuesto'] != '%':
-                tipo_imp = int(data['TipoImpuesto'])
-            else:
-                tipo_imp = "%"
-            self.insert_apremio_enc(
-                dato['DNI'], tipo_imp, num_documeto, data['CodBarrio'], dato['total'])
-            self.insert_factura(
-                dato['DNI'], data['TipoImpuesto'], num_documeto)
-            self.insert_apremio_detalle(dato['DNI'], tipo_imp, num_documeto)
+          
             data_ordenada.append(fila)
         return data_ordenada
 

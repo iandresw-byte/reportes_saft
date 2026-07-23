@@ -16,6 +16,59 @@ from src.ui.reports.utils_reportes import (
     ejecutar_reporte)
 
 
+async def generar_aviso_cobro(vista,app,  e,):
+    tipo_impuesto = vista.tipo_impuesto.current.value
+    tipo_persona = vista.tipo_persona.current.value
+    cod_aldea = vista.cod_aldea.current.value
+    cod_barrio = vista.cod_barrio.current.value
+    mora_mayor = vista.mora_mayor.current.value
+    fecha_minima = vista.fecha_minima
+    num_requerimientos = int(vista.num_avisos.current.value)
+    tipo_cta_sami = bool(vista.datos_system["TpoCuenta"])
+    from src.utils.config_manager import Config
+    TIPO_REPORTE = Config.obtener("APREMIO", "tipo_documento")
+    app.tamanio_documento
+    titulo_reporte = "AVISO DE COBRO"
+    if app.tamanio_documento == "OriginalCopiaCarta":
+        if tipo_cta_sami:
+            def reporte_apremio(datos): return ApremioOriginalCopiaSAMIReport(
+                datos, vista.datos_muni, titulo_reporte
+            )
+        else:
+            def reporte_apremio(datos): return ApremioOriginalCopiaGobReport(
+                datos, vista.datos_muni, titulo_reporte
+            )
+    elif app.tamanio_documento == "MediaCarta":
+        if tipo_cta_sami:
+            def reporte_apremio(datos): return ApremioMediaCartaSAMIReport(
+                datos, vista.datos_muni, titulo_reporte
+            )
+        else:
+            def reporte_apremio(datos): return ApremioMediaCartaGobReport(
+                datos, vista.datos_muni, titulo_reporte
+            )
+    else:
+        if tipo_cta_sami:
+                def reporte_apremio(datos): return ApremioCartaSAMIReport(
+                datos, vista.datos_muni, titulo_reporte
+            )
+        else:
+
+            def reporte_apremio(datos): return ApremioCartaGobReport(
+                datos, vista.datos_muni, titulo_reporte
+            )
+    
+    await ejecutar_reporte(
+        vista,
+        e,
+        "aviso_cobro.pdf",
+        obtener_datos=lambda: vista.apremio.obtener_mora_gob(
+            tipo_impuesto, tipo_persona, cod_aldea, cod_barrio, 0, num_requerimientos, mora_mayor, fecha_minima),
+        construir_reporte=reporte_apremio,
+        tipo="pdf"
+    )
+
+
 async def generar_primer_requerimiento(vista,app,  e,):
     tipo_impuesto = vista.tipo_impuesto.current.value
     tipo_persona = vista.tipo_persona.current.value

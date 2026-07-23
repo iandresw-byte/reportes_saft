@@ -3,6 +3,12 @@ from decimal import Decimal
 from src.models.apremio_models import ApremioAvPg, ApremioDetalle, ApremioEnDoc, EstadoApremio, ApremioRelacion
 from src.database.consultas.apremio_requerimiento_1 import *
 from src.database.consultas.apremio_requerimiento_2 import *
+from src.database.consultas.apremio_bienes_inmuebles import *
+from src.database.consultas.apremio_impuesto_personal import *
+from src.database.consultas.apremio_industria_comercio import *
+from src.database.consultas.apremio_servicios_publicos import *
+
+from src.database.consultas.apremio_todos_natural import *
 from src.database.consultas.apremio_certificacion import *
 
 class ApremioRepository:
@@ -19,7 +25,16 @@ class ApremioRepository:
             fecha_minia = datetime.now().strftime("%Y%m%d")
     
         if not self.sys["TpoCuenta"]:
-            query_nat = CONSULTA_APREMIO_GOB_NAT
+            if tipo_impuesto =='1':
+                query_nat =BIENES_INMUEBLES_INICIO_TOP
+            elif (tipo_impuesto =='2') or (tipo_impuesto =='3'):
+                query_nat=INDU_COMER_SERV_INICIO_TOP
+            elif tipo_impuesto =='4':
+                query_nat=IMPUESTO_PERSONAL_INICIO_TOP
+            elif tipo_impuesto =='5':
+                query_nat=SERVICIOS_PUBLICOS_INICIO_TOP
+            else:
+                query_nat = CONSULTA_APREMIO_GOB_NAT_TODOS
             query_ics_nat = CONSULTA_APREMIO_GOB_ICS_X_NAT
             query_ics = CONSULTA_APREMIO_GOB_ICS_JUR
         else:
@@ -27,18 +42,15 @@ class ApremioRepository:
             query_ics_nat = CONSULTA_APREMIO_SAMI_ICS_X_NAT
             query_ics = CONSULTA_APREMIO_SAMI_ICS_JUR
 
-        if tipo_impuesto == '2' and tipo_persona == '0':
-            query = query_ics
-            variables = (num_req, fecha_minia, tipo_impuesto, fecha_minia, cod_aldea,
-                         cod_barrio, dni, mora_minima)
-        elif tipo_impuesto == '2' and tipo_persona == '1':
+        if tipo_impuesto == '2' and tipo_persona == '1':
+            query = query_nat
+        elif tipo_impuesto == '2' and tipo_persona == '0':
             query = query_ics_nat
-            variables = (num_req, fecha_minia, tipo_impuesto, fecha_minia,  cod_aldea,
-                         cod_barrio, dni, mora_minima)
         else:
             query = query_nat
-            variables = (num_req, fecha_minia, tipo_impuesto,  fecha_minia, tipo_impuesto, tipo_persona,
-                         cod_aldea, cod_barrio, dni, mora_minima)
+        
+        variables = (num_req, fecha_minia, tipo_impuesto, tipo_persona,
+                          cod_barrio, cod_aldea, dni, mora_minima)
 
         with self.conexion.cursor() as cur:
 
@@ -303,13 +315,29 @@ class ApremioRepository:
             return True
 
     def get_facturas_a_requerir(self, dni: str, tipo_impuesto: int):
-        query = """SELECT        F_01.NumAvPg, 
+        
+        query = """
+            DECLARE @DNI vARCHAR(50) = ?
+            DECLARE @TIPOIMPUESTO VARCHAR(50) = ?
+                SELECT        F_01.NumAvPg, 
                 CAST(SUM(F_02.ValorUnitAvPgDet) AS FLOAT) AS Mora
                 FROM F_01 INNER JOIN
                 F_02 ON F_01.NumAvPg = F_02.NumAvPg
-                WHERE (F_01.DNI LIKE ?) AND (F_01.AvPgEstado = 1) AND (F_01.FechaVenceAvPg < GETDATE()) AND (F_01.AvPgTipoImpuesto LIKE ?)
+                WHERE (F_01.DNI LIKE @DNI) AND (F_01.AvPgEstado = 1) AND (F_01.FechaVenceAvPg < GETDATE()) AND (F_01.AvPgTipoImpuesto LIKE @TIPOIMPUESTO)
                 GROUP BY F_01.NumAvPg;
                 """
+        query_2 = """  
+                DECLARE @DNI vARCHAR(50) = ?
+                DECLARE @TIPOIMPUESTO VARCHAR(50) = ?
+                SELECT        F_01.NumAvPg, 
+                CAST(SUM(F_02.ValorUnitAvPgDet) AS FLOAT) AS Mora
+                FROM F_01 INNER JOIN
+                F_02 ON F_01.NumAvPg = F_02.NumAvPg
+                WHERE (F_01.DNI LIKE @DNI) AND (F_01.AvPgEstado = 1) AND (F_01.FechaVenceAvPg < GETDATE()) AND (F_01.AvPgTipoImpuesto in (0,1,2,3,4,5,7))
+                GROUP BY F_01.NumAvPg;
+                """
+        if tipo_impuesto == 10:
+            query = query_2
         with self.conexion.cursor() as cur:
             cur.execute(query, (dni, tipo_impuesto,))
             rows = cur.fetchall()

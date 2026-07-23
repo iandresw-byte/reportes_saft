@@ -58,7 +58,14 @@ class ApremioMediaCartaSAMIReport:
         texto_nota = """ Intereses y recargos calculados hasta la fecha de este documento. Los valores indicados en este documento son referenciales y pueden variar al momento del pago."""
         texto_fecha = f"Emitido a los {datetime.now().day} días del mes de {datetime.now().strftime('%B')} del año {datetime.now().year}"
         for index, contribuyente in enumerate(self.lista_datos):
-            qr_img = qrcode.make(contribuyente)
+            contribuyente_qr = { 
+                 "periodo":   contribuyente['periodo'],
+                 "nombre":   contribuyente['nombre'],
+                 "dni":   contribuyente['dni'],
+                 "direccion":   contribuyente['direccion'],
+                 "clave_catastro":   contribuyente['clave_catastro'],
+                 "num_documeto":   contribuyente['num_documeto']}
+            qr_img = qrcode.make(contribuyente_qr)
             buffer = BytesIO()
             qr_img.save(buffer, format="PNG")
             buffer.seek(0)

@@ -9,14 +9,15 @@ from src.services.apremio_identifiacion_services import ApremioIdentificacionSer
 from src.services.parametro_service import ParametroService
 from src.services.contribuyente_services import ContribuyenteService
 from src.ui.apremio.layout_apremio import build_layout
-from src.ui.apremio.componentes_apremio import botones_apremio, botones_contribuyente, busqueda_identificacion,  cerate_data_general, cerate_data_general_mora, cerate_data_general_proceso, tabla_identificacion_bi, tabla_identificacion_ics, tabla_identificacion_ip, tabla_identificacion_pp, tabla_identificacion_sp, tabla_requeridos, tabla_paginacion
+from src.ui.apremio.layuot_principal import build_layout_principal
+from src.ui.apremio.componentes_apremio import botones_apremio, botones_contribuyente, busqueda_identificacion,botones_apremio_table,  cerate_data_general, cerate_data_general_mora, cerate_data_general_proceso, tabla_identificacion_bi, tabla_identificacion_ics, tabla_identificacion_ip, tabla_identificacion_pp, tabla_identificacion_sp, tabla_requeridos, tabla_paginacion
 from src.ui.apremio.modals_apremio.editar_apremio_modal import abrir_modal_editar_apremio
 from src.ui.apremio.modals_apremio.eliminar_apremio_modal import abrir_modal_eliminar_apremio
 from src.ui.apremio.modals_apremio.ver_apremio_modal import abrir_modal_ver_apremio
 from src.ui.modals.apremio_2_modal import abrir_modal_rpt_apremio_2do
 from src.ui.modals.apremio_certificion_modal import abrir_modal_rpt_cerificacion
 from src.ui.components.ui_container import container_titulo, create_container, create_container_card, create_container_tabla
-from src.ui.apremio.eventos_apremio import( generar_primer_requerimiento, generar_primer_requerimiento_individual, 
+from src.ui.apremio.eventos_apremio import( generar_aviso_cobro, generar_primer_requerimiento, generar_primer_requerimiento_individual, 
                                            generar_segundo_requerimiento, obtener_contriuyente, 
 obtener_contriuyente_proceso, reiniciar_primer_requerimiento, generar_certificacion)
 from src.ui.modals.apremio_modal import abrir_modal_rpt_apremio_1er
@@ -24,6 +25,7 @@ from src.ui.components.ui_text import txt_label_text_tabs
 from src.ui.components.ui_colors import color_borde, color_texto, color_texto_2, color_bg, color_bg_2
 from src.ui.apremio.layout_identifiacion import build_layout_identificacion
 from src.ui.apremio.layout_contribuyente_individual import build_layout_contribuyente
+from src.ui.modals.apremio_aviso_cobro import abrir_modal_aviso_cobro
 borde_color = color_borde()
 texto_color = color_texto()
 texto_color_2 = color_texto_2()
@@ -55,12 +57,10 @@ class VistaApremio:
         # titulos
         self.titulo_apremio = container_titulo("PROCESO DE APREMIO")
         self.titulo_proceso = container_titulo("Inicar Procesos")
-        self.titulo_proceso_general = container_titulo(
-            "IDENTIFICACION DE MORA")
+        self.titulo_proceso_general = container_titulo("IDENTIFICACION DE MORA")
         self.titulo_proceso_bi = container_titulo("MORA BIENES INMUEBLES")
         self.titulo_proceso_ip = container_titulo("MORA IMPUESTO PERSONAL")
-        self.titulo_proceso_ics = container_titulo(
-            "MORA INDUSTRIA COMERCIO Y SERVICIOS")
+        self.titulo_proceso_ics = container_titulo("MORA INDUSTRIA COMERCIO Y SERVICIOS")
         self.titulo_proceso_sp = container_titulo("MORA SERVICIOS PUBLICOS")
         self.titulo_proceso_pp = container_titulo("MORA PLANES DE PAGO")
         self.tabla = tabla_requeridos(self)
@@ -69,10 +69,10 @@ class VistaApremio:
         self.tabla_identificacion_ip = tabla_identificacion_ip(self)
         self.tabla_identificacion_sp = tabla_identificacion_sp(self)
         self.tabla_identificacion_pp = tabla_identificacion_pp(self)
-        self.label_identificacion = txt_label_text_tabs(
-            "Identificacion de Mora")
+        self.label_identificacion = txt_label_text_tabs( "Identificacion de Mora")
         # botones
         self.contenedor_botones = create_container(botones_apremio(self))
+        self.contenedor_botones_table = botones_apremio_table(self)
         self.contenedor_requeridos = create_container_tabla(self.tabla)
         self.contenedor_identificacion_bi = create_container_tabla(
             self.tabla_identificacion_bi)
@@ -91,9 +91,12 @@ class VistaApremio:
         self.layout_control = build_layout(
             self.titulo_apremio,
             self.contenedor_requeridos,
-            self.titulo_proceso,
-            self.contenedor_botones,
+            self.contenedor_botones_table,
             self.contenedor_paginacion
+        )
+        self.layout_proincipal = build_layout_principal(
+            self.titulo_proceso,
+            self.contenedor_botones
         )
 
         self.layout_identificacion_bi = build_layout_identificacion(self.titulo_proceso_general, self.barra,
@@ -132,7 +135,10 @@ class VistaApremio:
             indicator_border_radius=0.5,
             indicator_color=borde_color,
             tabs=[
-
+                ft.Tab(
+                    text="PROCESOS",
+                    content=self.layout_proincipal
+                ),
 
                 ft.Tab(
                     text="CONTRIBUYENTE",
@@ -180,8 +186,9 @@ class VistaApremio:
         self.data_contribuyente_proceso = None
         self.identidad = ''
 
+
     def cerrar_modal(self):
-        self.actualizar_tabla()
+        
         self.dialog.open = False
         self.page.update()
 
@@ -193,7 +200,7 @@ class VistaApremio:
         self.filas_por_pagina = nueva_pagina
         self.actualizar_tabla()
 
-    def actualizar_tabla(self):
+    def actualizar_tabla(self, e=None):
         self.df = self.apremio.get_table_apremio()
         self.tabla = tabla_requeridos(self)
         self.paginacion = tabla_paginacion(self)
@@ -214,6 +221,20 @@ class VistaApremio:
         self.dialog = abrir_modal_rpt_apremio_1er(self, e)
         self.page.open(self.dialog)
         self.page.update()
+
+    def abril_modal_aviso_cobro(self, e):
+            self.tipo_impuesto = '%'
+            self.tipo_persona = '%'
+            self.cod_aldea = ''
+            self.cod_barrio = ''
+            self.nombre_aldea = ''
+            self.nombre_barrio = ''
+            self.num_avisos = ''
+            self.mora_mayor = ''
+            self.fecha_minima = ''
+            self.dialog = abrir_modal_aviso_cobro(self, e)
+            self.page.open(self.dialog)
+            self.page.update()
 
     def abril_modal_apremio_2do(self, e):
         self.tipo_impuesto = '%'
@@ -271,6 +292,10 @@ class VistaApremio:
 
     def generar_apremio_pdf_1er(self, e):
         asyncio.run(generar_primer_requerimiento(self, self.app, e))
+
+
+    def generar_aviso_cobro(self, e):
+            asyncio.run(generar_aviso_cobro(self, self.app, e))
 
     def generar_apremio_pdf_individual(self, e):
         self.tipo_doc = 1
