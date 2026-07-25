@@ -33,7 +33,7 @@ class FinalizarPagosIPService:
             dtype={"Identidad": str}
         )
         data_declaracion_nat = []
-
+        print(df)
         num_fila_totales = len(df)-1
         decracion = DeclaraImpInd(
             Identidad="",
