@@ -60,28 +60,29 @@ class UpdateService:
     def leer_version_local(self):
         return APP_VERSION
 
-    def verificar_actualizacion_inicio(self, e):
+    def verificar_actualizacion_inicio(self ,e=None):
+        
+        
         try:
-
             version_local = self.leer_version_local()
             version_remota = self.leer_version_remota()
-
             if version_local != version_remota:
                 base_dir = r"C:\Program Files (x86)\SAFT\reportes_py"
                 updater_ui = os.path.join(base_dir, "updater.exe")
                 if not os.path.exists(updater_ui):
                     tmp_dir = descargar_actualizacion()
                     reemplazar_archivos(tmp_dir,)
-
                 if os.path.exists(updater_ui):
                     time.sleep(1)
                     subprocess.Popen([updater_ui], shell=True)
                     return True
             else:
                 return False
-
         except Exception as ex:
             return False
+
+
+    
 
     def actualizacion(self):
         try:

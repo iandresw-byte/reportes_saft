@@ -10,7 +10,7 @@ def abrir_tarjeta_unica(vista, e):
 
     txt_dni = create_texFiel_fijas(
         "Numero de DNI o RTM.", read_only=False, ref=vista.identidad)
-    txt_dni.value = "0071196700238"
+    txt_dni.value = "0101197200627"
     btn_aceptar = create_boton_aceptar()
     btn_aceptar.on_click = vista.generar_ver_tarjeta_unica
     btn_salir = create_boton_salir_modal()

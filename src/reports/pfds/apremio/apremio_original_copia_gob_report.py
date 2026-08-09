@@ -21,7 +21,7 @@ from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import letter
 from datetime import datetime
 from io import BytesIO
-from src.reports.utils.firmas_pdf import tabla_frima_admin_fima_recibido
+from src.reports.utils.firmas_pdf import firma_apremio_dos, firma_apremio_tres
 from src.reports.pfds.apremio.crea_aviso import crear_aviso
 from src.reports.tablas.tabla_aviso_cobro import tabla_aviso_mora_media_carta
 from src.reports.utils.logo_mun_pdf import logo_muni_imagen_media_carta
@@ -29,11 +29,18 @@ from src.reports.utils.tabla_titulo_pfd import titulo_mudia_carta
 from src.ui.components.ui_style_table import estilos_parrafo
 from src.ui.components.ui_style_pdf import getSampleStyleSheet as estilos_mod
 
+from src.utils.config_manager import Config
+NUM_FIRMAS = Config.obtener("APREMIO", "NumFirmas")
+FIRMAS_1 = Config.obtener("APREMIO", "firma_1")
+FIRMAS_2 = Config.obtener("APREMIO", "firma_2")
+CARGO_1 = Config.obtener("APREMIO", "cargo_1")
+CARGO_2 = Config.obtener("APREMIO", "cargo_2")
 
 class ApremioOriginalCopiaGobReport:
-    def __init__(self, lista_datos, municipio, titulo_reporte):
+    def __init__(self, lista_datos, municipio,administracion, titulo_reporte):
         self.lista_datos = lista_datos
         self.municipio = municipio
+        self.admin = administracion
         self.titulo = titulo_reporte
         self.num_requerimiento = "1er"
         self.margen = 0.4* cm
@@ -116,25 +123,53 @@ class ApremioOriginalCopiaGobReport:
             BASE_DIR = Path(sys.executable).parent
         else:
             BASE_DIR = r"C:\Users\iAndresw\RepositorioLocal\reportes_saft"
-        firma_admin = ''
+        firma_admin_1 = ''
+        firma_admin_2 = ''
         if self.municipio["CodMuni"] == "1807":
             DIR_FIRMA= os.path.join(BASE_DIR,  "assets", "images","firma_tributaria.png")
-            LOGO_DIR= os.path.join(BASE_DIR, "assets", "images","logo_olanchito.png")
-            print(LOGO_DIR)
+            DIR_FIRMA_2= os.path.join(BASE_DIR,  "assets", "images","firma_alcalde.png")
+            LOGO_MUN= os.path.join(BASE_DIR, "assets", "images","logo_olanchito.png")
+            print(LOGO_MUN)
+            
             if DIR_FIRMA:
-                firma_admin = Image(DIR_FIRMA, width=2.60*cm, height=1.60*cm)
+                firma_admin_1 = Image(DIR_FIRMA, width=3*cm, height=2*cm)
             else:
-                firma_admin = None
-            if LOGO_DIR:
-                logo_mun = Image(LOGO_DIR, width=1.20*cm, height=1.20*cm)
+                firma_admin_1 = None
+                
+            if DIR_FIRMA_2:
+                firma_admin_2 = Image(DIR_FIRMA_2, width=3*cm, height=2*cm)
+            else:
+                firma_admin_2 = None
+            logo_mun = Image(LOGO_MUN, width=1.20*cm, height=1.20*cm)
             
         estilo_personal = estilos_parrafo()
         texto_parrafo = f"""Por este medio se le hace el {self.num_requerimiento} requerimiento de pago de los impuestos y servicios adeudados a esta municipalidad, a fin de que en el término de 30 días calendario, proceda a efectuar el pago del valor que se detalla a continuación"""
         texto_pie = f"""En caso de no atender este requerimiento en el plazo indicado, se procederá con el procedimiento administrativo correspondiente."""
         texto_nota = """ Intereses y recargos calculados hasta la fecha de este documento. Los valores indicados en este documento son referenciales y pueden variar al momento del pago."""
         texto_fecha = f"Emitido a los {datetime.now().day} días del mes de {datetime.now().strftime('%B')} del año {datetime.now().year}"
+        paragrap_texto_parrafo = Paragraph(texto_parrafo, estilos["Normal"])
+        paragrap_texto_pie = Paragraph(texto_pie, estilos["Normal"])
+        paragrap_texto_nota = Paragraph(texto_nota, estilos["Normal"])
+        paragrap_texto_fecha = Paragraph(texto_fecha, estilos["Normal"])
+
+
         cc_original = Paragraph(f"Original: Contribuyente", estilos["Normal_grey_bold"])
         cc_copia = Paragraph(f"Copia: Archivo", estilos["Normal_grey_bold"])
+
+        muni_titulo = Paragraph( f"{self.municipio['NombreMuni']}", estilo_personal["TituloMuniMedia"],)
+        titulo = Paragraph(f"<b>{self.titulo}</b><br/>", estilos["Title"]  )
+        if NUM_FIRMAS == '1':
+            tabla_firma = firma_apremio_tres(
+                self.admin[FIRMAS_1],
+                CARGO_1,
+                self.admin[FIRMAS_2],
+                CARGO_2,
+                firma_admin_1,
+                firma_admin_2
+                )
+        else:
+            tabla_firma = firma_apremio_dos(self.admin[FIRMAS_1],CARGO_1,firma_admin_1)
+        
         for index, contribuyente in enumerate(self.lista_datos):
             contribuyente_qr = { 
                  "periodo":   contribuyente['periodo'],
@@ -148,46 +183,39 @@ class ApremioOriginalCopiaGobReport:
             qr_img.save(buffer, format="PNG")
             buffer.seek(0)
             qr_flowable = Image(buffer, width=1.20*cm, height=1.20*cm)
-            muni_titulo = Paragraph( f"{self.municipio['NombreMuni']}", estilo_personal["TituloMuniMedia"],)
-            titulo = Paragraph(f"<b>{self.titulo}</b><br/>", estilos["Title"]  )
             tabla_titulo = titulo_mudia_carta(titulo, muni_titulo, logo_mun, qr_flowable)
-            original = crear_aviso(self, contribuyente, "ORIGINAL")
-            copia = crear_aviso(self, contribuyente, "COPIA")
+            encabezado = crear_aviso(self, contribuyente, "ORIGINAL")
+        
             tabla_duo = tabla_aviso_mora_media_carta(contribuyente["mora"])
-            tabla_firma = tabla_frima_admin_fima_recibido("","Administracion Tributaria","",firma_admin)
+            
             elementos.append(tabla_titulo)
-            elementos.append(Spacer(1, 8))
-            elementos.extend(original)
-            elementos.append(Spacer(1, 4))
-            elementos.append(Paragraph(texto_parrafo, estilos["Normal"]))
+            elementos.append(Spacer(1, 5))
+            elementos.extend(encabezado)
+            elementos.append(Spacer(1, 2))
+            elementos.append(paragrap_texto_parrafo)
             elementos.append(Spacer(1, 2))
             elementos.append(tabla_duo)
             elementos.append(Spacer(1, 2))
-            elementos.append(Paragraph(texto_pie, estilos["Normal"]))
-            elementos.append(Paragraph(texto_nota, estilos["Normal"]))
-            elementos.append(Paragraph(texto_fecha, estilos["Normal"]))
-            elementos.append(Spacer(1, 20))
+            elementos.append(paragrap_texto_pie)
+            elementos.append(paragrap_texto_nota)
+            elementos.append(paragrap_texto_fecha)
+            elementos.append(Spacer(1, 18))
             elementos.append(tabla_firma)
             elementos.append(cc_original)
-            elementos.append(Spacer(1, 1))
-            elementos.append(cc_copia)
             elementos.append(FrameBreak())
-
             elementos.append(tabla_titulo)
-            elementos.append(Spacer(1, 8))
-            elementos.extend(copia)
-            elementos.append(Spacer(1, 4))
-            elementos.append(Paragraph(texto_parrafo, estilos["Normal"]))
+            elementos.append(Spacer(1, 5))
+            elementos.extend(encabezado)
+            elementos.append(Spacer(1, 2))
+            elementos.append(paragrap_texto_parrafo)
             elementos.append(Spacer(1, 2))
             elementos.append(tabla_duo)
             elementos.append(Spacer(1, 2))
-            elementos.append(Paragraph(texto_pie, estilos["Normal"]))
-            elementos.append(Paragraph(texto_nota, estilos["Normal"]))
-            elementos.append(Paragraph(texto_fecha, estilos["Normal"]))
-            elementos.append(Spacer(1, 20))
+            elementos.append(paragrap_texto_pie)
+            elementos.append(paragrap_texto_nota)
+            elementos.append(paragrap_texto_fecha)
+            elementos.append(Spacer(1, 18))
             elementos.append(tabla_firma)
-            elementos.append(cc_original)
-            elementos.append(Spacer(1, 1))
             elementos.append(cc_copia)
             if index < len(self.lista_datos) - 1:
                 elementos.append(PageBreak())

@@ -5,7 +5,9 @@ from src.services.constancias_services import ConstanciasService
 from src.ui.constancias.layout import build_layout
 from src.ui.constancias.componentes import botones_catastro, botones_secretaria, botones_uma
 from src.ui.constancias.eventos import cargar_data_licencia_uma_ics
+from src.ui.constancias.modals.licencia_ambiental_data_modal import abrir_modal_licencia_ics_data
 from src.ui.components.ui_container import container_titulo, create_container
+from src.ui.constancias.modals.licencia_ambiental import abrir_modal_licencia_ics
 from src.ui.constancias.modals.licencia_ambiental import abrir_modal_licencia_ics
 
 
@@ -19,7 +21,7 @@ class VistaConstancias:
         self._init_services()
 
         # titulos
-        self.titulo_mora = container_titulo("REPORTES DE MORA")
+        self.titulo_mora = container_titulo("LICENCIAS PERMISOS")
         self.titulo_otros = container_titulo("OTROS REPORTES")
         self.titulo_ingresos = container_titulo("OTROS DE INGRESOS")
 
@@ -60,4 +62,16 @@ class VistaConstancias:
         self.page.update()
 
     def generar_pdf_licencia_ambiental_ics(self, e):
-        asyncio.run(cargar_data_licencia_uma_ics(self, e))
+        num_recibo = self.num_recibo.current.value
+        data = self.constancias.obtener_licencia_uma_ics(num_recibo),
+        self.dialog = abrir_modal_licencia_ics_data(self,data, e)
+        self.page.open(self.dialog)
+        self.page.update()
+
+    def actualizar_pdf_licencia_ambiental_ics(self, e):
+            num_recibo = self.num_recibo.current.value
+            data = self.constancias.obtener_licencia_uma_ics(num_recibo),
+            self.dialog = abrir_modal_licencia_ics_data(self,data, e)
+            self.page.open(self.dialog)
+            self.page.update()
+    

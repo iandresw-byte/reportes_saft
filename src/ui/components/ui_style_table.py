@@ -253,7 +253,7 @@ def estilos_parrafo():
     ))
     estilos.add(ParagraphStyle(
         name='TituloMuniMedia',
-        fontSize=15,
+        fontSize=13,
         alignment=1,  # centrado
         #leading=35,
         spaceAfter=1,

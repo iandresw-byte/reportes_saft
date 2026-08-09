@@ -3,40 +3,66 @@ from src.ui.components.ui_style_table import columa_style, estilos_parrafo, fila
 from src.ui.components.ui_style_pdf import getSampleStyleSheet as estilos_mod
 from reportlab.platypus import  Table, TableStyle, Paragraph
 from datetime import date
-def crear_aviso(self, contribuyente, tipo):
-    estilos = estilos_mod()
-    elementos = []
 
-    if tipo == "ORIGINAL":
-        titulo = "ORIGINAL"
-    else:
-        titulo = "COPIA"
-    hoy = date.today()
-    periodo = Paragraph(f"<b>Periodo:</b> {contribuyente['periodo']}", estilos["Normal"],  )
-    nombre = Paragraph( f"<b>Contribuyente:</b> {contribuyente['nombre']}",  estilos["Normal"],)
-    dni = Paragraph( f"<b>DNI:</b> {contribuyente['dni']}", estilos["Normal"], )
-    direccion = Paragraph(f"<b>Dirección:</b> {contribuyente['direccion']}", estilos["Normal"],)
-    clave_cata = Paragraph( f"<b>Claves Catastrales:</b> {contribuyente['clave_catastro']}", estilos["Normal"],)
-    num_documento = Paragraph(f"<b>No. RDP-{hoy.year}-{contribuyente['num_documeto']}</b>",estilos["Normal_rojo_bold"],)
-
-    fila = [nombre, dni, periodo,  num_documento]
-    fila_2 = [direccion,   clave_cata, Paragraph("",), Paragraph("",),]
-
-    tabla_datos_generales = Table(
-        [fila, fila_2],
-        colWidths=[270, 100, 140,90],  # ajusta según tus márgenes
-    )
-    tabla_datos_generales.setStyle(TableStyle([
+#estilos 
+estilos = estilos_mod()
+ESTILOS_TABLA_CREAR_AVISO = TableStyle([
         ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
         ("VALIGN", (0, 0), (-1, -1), "RIGHT"),
         ('SPAN', (1, 1), (3, 1)),
-        ("TOPPADDING", (0, 0), (-1, -1), 2),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-    ]))
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ])
 
-    elementos.append(tabla_datos_generales)
-    
-    return elementos
+def crear_aviso(self, contribuyente, tipo):
+    hoy = date.today()
+
+    claves = (contribuyente["clave_catastro"] or "")[:70]
+    nombre = (contribuyente["nombre"] or "")[:40]
+    direccion = (contribuyente["direccion"] or "")[:80]
+
+    periodo = Paragraph(
+        f"<b>Periodo:</b> {contribuyente['periodo']}",
+        estilos["Normal"]
+    )
+
+    nombre = Paragraph(
+        f"<b>Contribuyente:</b> {nombre}",
+        estilos["Normal"]
+    )
+
+    dni = Paragraph(
+        f"<b>DNI:</b> {contribuyente['dni']}",
+        estilos["Normal"]
+    )
+
+    direccion = Paragraph(
+        f"<b>Dirección:</b> {direccion}",
+        estilos["Normal"]
+    )
+
+    clave_cata = Paragraph(
+        f"<b>Claves Catastrales:</b> {claves}",
+        estilos["Normal"]
+    )
+
+    num_documento = Paragraph(
+        f"<b>No. RDP-{hoy.year}-{contribuyente['num_documeto']}</b>",
+        estilos["Normal_rojo_bold"]
+    )
+
+    fila = [nombre, dni, periodo, num_documento]
+
+    fila_2 = [direccion, clave_cata, "", ""]
+
+    tabla_datos_generales = Table(
+        [fila, fila_2],
+        colWidths=[270, 100, 140, 90],
+    )
+
+    tabla_datos_generales.setStyle(ESTILOS_TABLA_CREAR_AVISO)
+
+    return [tabla_datos_generales]
 
 def crear_aviso_original(self, contribuyente, tipo):
     estilos = estilos_mod()

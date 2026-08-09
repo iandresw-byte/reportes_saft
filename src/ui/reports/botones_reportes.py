@@ -11,11 +11,9 @@ def botones_mora(vista):
                      vista.abrir_modal_mora_vs_ingresos),
         create_boton("Mora vs Ingresos BI (Aldea - Año)",
                      vista.abrir_modal_mora_aldea_anio),
-        create_boton("Analisis de Ingresos",
-                     vista.abril_modal_analisi_ingresos),
-        create_boton("Anula Plan de Pago", vista.abril_modal_anula_pp),
-        create_boton("Reporte Permiso Operacion",
-                     vista.abril_modal_rpt_permisos_operacion),
+        
+        
+        
         create_boton("Estratificacion INE",
                      vista.abrir_modal_estratificacion_ine),
         create_boton("Estratificacion Declaraciones SAR",
@@ -37,6 +35,10 @@ def botones_ingresos(vista):
                      vista.abrir_modal_ingresos_mensual_depto),
         create_boton("Ingresos Bomberos",
                      vista.abrir_modal_ingresos_bomberos),
+        create_boton("Analisis de Ingresos Cuentas Gobernacion",
+                             vista.abril_modal_analisi_ingresos),
+        create_boton("Reporte Permiso Operacion",
+                             vista.abril_modal_rpt_permisos_operacion),
     ]
 
 
@@ -57,4 +59,5 @@ def botones_herramientas(vista):
     return [
         create_boton("Tarjera Unica",
                      vista.abril_modal_tarjeta_unica),
+        create_boton("Anula Plan de Pago", vista.abril_modal_anula_pp),
   ]

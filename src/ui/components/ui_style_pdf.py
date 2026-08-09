@@ -350,7 +350,7 @@ def getSampleStyleSheet():
     stylesheet.add(ParagraphStyle(name='Title',
                                   parent=stylesheet['Normal'],
                                   fontName = _baseFontNameB,
-                                  fontSize=15,
+                                  fontSize=13,
                                   #leading=22,
                                   alignment=TA_CENTER,
                                   spaceAfter=1

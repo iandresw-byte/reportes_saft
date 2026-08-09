@@ -1,4 +1,4 @@
-from flet import Dropdown, dropdown, TextStyle, ButtonStyle, Row, MainAxisAlignment
+from flet import Dropdown, dropdown, TextStyle, ButtonStyle, Row, MainAxisAlignment, Ref
 from src.ui.components.ui_colors import color_texto, color_bg_2, color_borde
 from src.ui.components.ui_text import create_text_paginacion
 texto_color = color_texto()
@@ -65,11 +65,12 @@ def dropbox_aldeas(aldeas: list[dict], ref):
         text_style=TextStyle(size=10, font_family="Tahoma", color=texto_color))
 
 
-def dropbox_departamentos(deptos_municipales: list[dict], ref):
+def dropbox_departamentos( deptos_municipales: list[dict], ref:Ref, label=None,):
     texto_color = color_texto()
     border_color = color_borde()
     bg_color = color_bg_2()
-
+    if not label:
+        label = "Seleccione el Departamento"
     data = [dropdown.Option(
             key=str(a["IdDeptos"]),
             text=a["DeptoDesc"],
@@ -80,7 +81,7 @@ def dropbox_departamentos(deptos_municipales: list[dict], ref):
             for a in deptos_municipales]
     return Dropdown(
         ref=ref,
-        label="Seleccione el Departamento",
+        label=label,
         width=300,
         options=data,
         color=texto_color,

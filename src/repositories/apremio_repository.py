@@ -16,29 +16,40 @@ class ApremioRepository:
         self.conexion = conexion
         self.sys = sistem
 
-    def obtener_1er_requerimiento(self, tipo_impuesto: str, tipo_persona: str, cod_aldea: str, cod_barrio: str, dni='%', num_req=10, mora_minima=0.0,
+
+    def obtener_aviso(self, tipo_impuesto: str, tipo_persona: str, cod_aldea: str, cod_barrio: str, dni='%', num_req=10, mora_minima=0.0,
                                   fecha_minia=None):
         if tipo_impuesto == 10:
             tipo_impuesto = "%"  # type: ignore
+
 
         if not fecha_minia:
             fecha_minia = datetime.now().strftime("%Y%m%d")
     
         if not self.sys["TpoCuenta"]:
             if tipo_impuesto =='1':
-                query_nat =BIENES_INMUEBLES_INICIO_TOP
+                query_nat =BIENES_INMUEBLES_INICIO_TOP_GOB_AVISO
             elif (tipo_impuesto =='2') or (tipo_impuesto =='3'):
-                query_nat=INDU_COMER_SERV_INICIO_TOP
+                query_nat=INDU_COMER_SERV_INICIO_TOP_GOB_AVISO
             elif tipo_impuesto =='4':
-                query_nat=IMPUESTO_PERSONAL_INICIO_TOP
+                query_nat=IMPUESTO_PERSONAL_INICIO_TOP_GOB_AVISO
+            elif tipo_impuesto =='5':
+                query_nat=SERVICIOS_PUBLICOS_INICIO_TOP_AVISO
+            else:
+                query_nat = CONSULTA_APREMIO_GOB_NAT_TODOS_GOB_AVISO
+            query_ics_nat = CONSULTA_APREMIO_GOB_ICS_X_NAT_AVISO
+            query_ics = CONSULTA_APREMIO_GOB_ICS_JUR
+        else:
+            if tipo_impuesto =='1':
+                query_nat =BIENES_INMUEBLES_INICIO_TOP_SAMI
+            elif (tipo_impuesto =='2') or (tipo_impuesto =='3'):
+                query_nat=INDU_COMER_SERV_INICIO_TOP_SAMI
+            elif tipo_impuesto =='4':
+                query_nat=IMPUESTO_PERSONAL_INICIO_TOP_SAMI
             elif tipo_impuesto =='5':
                 query_nat=SERVICIOS_PUBLICOS_INICIO_TOP
             else:
-                query_nat = CONSULTA_APREMIO_GOB_NAT_TODOS
-            query_ics_nat = CONSULTA_APREMIO_GOB_ICS_X_NAT
-            query_ics = CONSULTA_APREMIO_GOB_ICS_JUR
-        else:
-            query_nat = CONSULTA_APREMIO_SAMI_NAT
+                query_nat = CONSULTA_APREMIO_GOB_NAT_TODOS_SAMI
             query_ics_nat = CONSULTA_APREMIO_SAMI_ICS_X_NAT
             query_ics = CONSULTA_APREMIO_SAMI_ICS_JUR
 
@@ -50,7 +61,63 @@ class ApremioRepository:
             query = query_nat
         
         variables = (num_req, fecha_minia, tipo_impuesto, tipo_persona,
-                          cod_barrio, cod_aldea, dni, mora_minima)
+                          cod_barrio,cod_aldea, dni, mora_minima)
+
+        with self.conexion.cursor() as cur:
+
+            cur.execute(query, variables)
+            rows = cur.fetchall()
+            if not rows:
+                return []
+            columns = [column[0] for column in cur.description]
+            return [dict(zip(columns, row)) for row in rows]
+
+        
+    def obtener_1er_requerimiento(self, tipo_impuesto: str, tipo_persona: str, cod_aldea: str, cod_barrio: str, dni='%', num_req=10, mora_minima=0.0,
+                                  fecha_minia=None):
+        if tipo_impuesto == 10:
+            tipo_impuesto = "%"  # type: ignore
+
+
+        if not fecha_minia:
+            fecha_minia = datetime.now().strftime("%Y%m%d")
+    
+        if not self.sys["TpoCuenta"]:
+            if tipo_impuesto =='1':
+                query_nat =BIENES_INMUEBLES_INICIO_TOP_GOB
+            elif (tipo_impuesto =='2') or (tipo_impuesto =='3'):
+                query_nat=INDU_COMER_SERV_INICIO_TOP_GOB
+            elif tipo_impuesto =='4':
+                query_nat=IMPUESTO_PERSONAL_INICIO_TOP_GOB
+            elif tipo_impuesto =='5':
+                query_nat=SERVICIOS_PUBLICOS_INICIO_TOP
+            else:
+                query_nat = CONSULTA_APREMIO_GOB_NAT_TODOS_GOB
+            query_ics_nat = CONSULTA_APREMIO_GOB_ICS_X_NAT
+            query_ics = CONSULTA_APREMIO_GOB_ICS_JUR
+        else:
+            if tipo_impuesto =='1':
+                query_nat =BIENES_INMUEBLES_INICIO_TOP_SAMI
+            elif (tipo_impuesto =='2') or (tipo_impuesto =='3'):
+                query_nat=INDU_COMER_SERV_INICIO_TOP_SAMI
+            elif tipo_impuesto =='4':
+                query_nat=IMPUESTO_PERSONAL_INICIO_TOP_SAMI
+            elif tipo_impuesto =='5':
+                query_nat=SERVICIOS_PUBLICOS_INICIO_TOP
+            else:
+                query_nat = CONSULTA_APREMIO_GOB_NAT_TODOS_SAMI
+            query_ics_nat = CONSULTA_APREMIO_SAMI_ICS_X_NAT
+            query_ics = CONSULTA_APREMIO_SAMI_ICS_JUR
+
+        if tipo_impuesto == '2' and tipo_persona == '1':
+            query = query_nat
+        elif tipo_impuesto == '2' and tipo_persona == '0':
+            query = query_ics_nat
+        else:
+            query = query_nat
+        
+        variables = (num_req, fecha_minia, tipo_impuesto, tipo_persona,
+                          cod_barrio,cod_aldea, dni, mora_minima)
 
         with self.conexion.cursor() as cur:
 

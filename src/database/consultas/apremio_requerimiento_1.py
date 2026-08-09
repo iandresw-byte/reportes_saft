@@ -109,7 +109,53 @@ CONSULTA_APREMIO_GOB_ICS_X_NAT = """
         HAVING CAST(SUM(F_02.ValorUnitAvPgDet) AS FLOAT)  > ?
         ORDER BY  FC_03.DNI 
 """
+CONSULTA_APREMIO_GOB_ICS_X_NAT_AVISO = """
+        SELECT top  (?) FC_03.DNI,
+            FC_03.Pnombre,FC_03.SNombre, FC_03.PApellido,FC_03.SApellido, FC_03.Direccion,
+                                STUFF((
+                SELECT DISTINCT ', ' + F2.ClaveCatastro
+                FROM F_01 F1_2
+                    INNER JOIN F_02 F2 ON F1_2.NumAvPg = F2.NumAvPg
+                WHERE F1_2.DNI = FC_03.DNI
+                    AND F1_2.AvPgEstado = 1
+                    AND F1_2.FechaVenceAvPg < ?
+                    AND F1_2.AvPgTipoImpuesto LIKE ?
+                FOR XML PATH(''), TYPE
+            ).value('.', 'VARCHAR(MAX)'), 1, 2, '') AS ClavesCatastro,
+            min(F_01.FechaVenceAvPg) mes_ini,
+            max(F_01.FechaVenceAvPg) mes_fin,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '111111' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS ip,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '111112' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS ic,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '111113' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS com,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '111114' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS ser,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '111110' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS bi,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '111118' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS servicios,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '111116' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS pecuario,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '111119' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS tasas,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '112120' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS multas,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '112121' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS recargos,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '112122' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS recuperacion,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '112123' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS recuperacionSp,
+            CAST(SUM(CASE WHEN substring(F_02.CtaIngreso, 1, 6) = '112126' THEN F_02.ValorUnitAvPgDet ELSE 0 END) AS FLOAT) AS intereses,
+            CAST(SUM(F_02.ValorUnitAvPgDet ) AS FLOAT) AS total
+        FROM F_01 INNER JOIN
+            FC_03 ON F_01.DNI = FC_03.DNI INNER JOIN
+            F_02 ON F_01.NumAvPg = F_02.NumAvPg
+        WHERE (F_01.AvPgEstado = 1) AND 
+            
+            (F_01.AvPgTipoImpuesto in (2,3)) AND
+            (FC_03.CodAldea LIKE ?) AND 
+            (FC_03.CodBarrio LIKE ?) AND
+            (FC_03.DNI LIKE ?) AND
+            (NOT EXISTS (SELECT 1 AS Expr1 FROM ApremioEnDoc AS A  
+            WHERE (Identidad = FC_03.DNI) AND 
+            (TipoImpuesto = F_01.AvPgTipoImpuesto)
+            AND  (Estado <> 'Anulado')))
 
+        GROUP BY  FC_03.DNI, FC_03.Pnombre,FC_03.SNombre, FC_03.PApellido,FC_03.SApellido, FC_03.Direccion
+        HAVING CAST(SUM(F_02.ValorUnitAvPgDet) AS FLOAT)  > ?
+        ORDER BY  FC_03.DNI 
+"""
 CONSULTA_APREMIO_SAMI_ICS_X_NAT = """
         SELECT top  (?) FC_03.DNI,
             FC_03.Pnombre,FC_03.SNombre, FC_03.PApellido,FC_03.SApellido, FC_03.Direccion,

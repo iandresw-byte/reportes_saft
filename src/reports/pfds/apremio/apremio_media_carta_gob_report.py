@@ -13,18 +13,25 @@ from reportlab.lib.pagesizes import letter, HALF_LETTER, landscape
 from datetime import datetime
 from io import BytesIO
 from src.reports.tablas.tabla_aviso_cobro import tabla_aviso_mora_media_carta
-from src.reports.utils.firmas_pdf import tabla_frima_admin_fima_recibido
+from src.reports.utils.firmas_pdf import firma_apremio_dos, firma_apremio_tres
 from src.reports.pfds.apremio.crea_aviso import crear_aviso_original
 from src.reports.utils.tabla_titulo_pfd import titulo_mudia_carta
 from src.reports.utils.logo_mun_pdf import logo_muni_imagen_media_carta
 from src.ui.components.ui_style_table import columa_style, estilos_parrafo, fila_style, fila_style_moneda
 from src.ui.components.ui_style_pdf import getSampleStyleSheet as estilos_mod
 
+from src.utils.config_manager import Config
+NUM_FIRMAS = Config.obtener("APREMIO", "NumFirmas")
+FIRMAS_1 = Config.obtener("APREMIO", "firma_1")
+FIRMAS_2 = Config.obtener("APREMIO", "firma_2")
+CARGO_1 = Config.obtener("APREMIO", "cargo_1")
+CARGO_2 = Config.obtener("APREMIO", "cargo_2")
 
 class ApremioMediaCartaGobReport:
-    def __init__(self, lista_datos, municipio, titulo_reporte):
+    def __init__(self, lista_datos, municipio,administracion, titulo_reporte):
         self.lista_datos = lista_datos
         self.municipio = municipio
+        self.admin = administracion
         self.titulo = titulo_reporte
         self.num_requerimiento = "1er"
         self.margen = 0.4*cm
@@ -44,17 +51,23 @@ class ApremioMediaCartaGobReport:
             BASE_DIR = r"C:\Users\iAndresw\RepositorioLocal\reportes_saft"
         
         logo_mun = logo_muni_imagen_media_carta(ruta_base)
-        firma_admin = ''
+        firma_admin_1 = ''
+        firma_admin_2 = ''
         if self.municipio["CodMuni"] == "1807":
             DIR_FIRMA= os.path.join(BASE_DIR,  "assets", "images","firma_tributaria.png")
+            DIR_FIRMA_2= os.path.join(BASE_DIR,  "assets", "images","firma_alcalde.png")
             LOGO_MUN= os.path.join(BASE_DIR, "assets", "images","logo_olanchito.png")
             print(LOGO_MUN)
             
             if DIR_FIRMA:
-                firma_admin = Image(DIR_FIRMA, width=2.60*cm, height=1.60*cm)
+                firma_admin_1 = Image(DIR_FIRMA, width=3*cm, height=2*cm)
             else:
-                firma_admin = None
-
+                firma_admin_1 = None
+                
+            if DIR_FIRMA_2:
+                firma_admin_2 = Image(DIR_FIRMA_2, width=3*cm, height=2*cm)
+            else:
+                firma_admin_2 = None
             logo_mun = Image(LOGO_MUN, width=1.20*cm, height=1.20*cm)
         
         estilo_personal = estilos_parrafo()
@@ -82,7 +95,17 @@ class ApremioMediaCartaGobReport:
             tabla_titulo = titulo_mudia_carta(titulo, muni_titulo, logo_mun, qr_flowable)
             original = crear_aviso_original(self, contribuyente, "ORIGINAL")
             tabla_duo = tabla_aviso_mora_media_carta(contribuyente["mora"])
-            tabla_firma = tabla_frima_admin_fima_recibido("","Administracion Tributaria","",firma_admin)
+            if NUM_FIRMAS == '1':
+                tabla_firma = firma_apremio_tres(
+                    self.admin[FIRMAS_1],
+                    CARGO_1,
+                    self.admin[FIRMAS_2],
+                    CARGO_2,
+                    firma_admin_1,
+                    firma_admin_2
+                    )
+            else:
+                tabla_firma = firma_apremio_dos(self.admin[FIRMAS_1],CARGO_1,firma_admin_1)
             elementos.append(tabla_titulo)
             elementos.append(Spacer(1, 10))
             elementos.extend(original)

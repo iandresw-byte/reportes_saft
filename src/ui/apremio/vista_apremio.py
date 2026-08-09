@@ -160,13 +160,10 @@ class VistaApremio:
         self.datos_muni_admin = self.app.datos_admin
         self.datos_system = self.app.datos_system
         self.user = self.app.usuario_actual
-        self.apremio = ApremioService(
-            self.app.conexion_saft, self.datos_system, self.user)
-        self.apremio_identificacion = ApremioIdentificacionService(
-            self.app.conexion_saft, self.datos_system, self.user)
+        self.apremio = ApremioService( self.app.conexion_saft, self.datos_system, self.user)
+        self.apremio_identificacion = ApremioIdentificacionService(self.app.conexion_saft, self.datos_system, self.user)
         self.aldeas = AldeaService(self.app.conexion_saft)
         self.contribuente = ContribuyenteService(self.app.conexion_saft)
-        
         self.pagina_actual = 1
         self.filas_por_pagina = 10
         self.df = []
@@ -291,11 +288,33 @@ class VistaApremio:
         self.page.update()
 
     def generar_apremio_pdf_1er(self, e):
+        boton = e.control
+        # Deshabilitar
+        boton.text = "Generando..."
+        boton.width = 120
+        boton.disabled = True
+        boton.update()
         asyncio.run(generar_primer_requerimiento(self, self.app, e))
+        boton.text = "PDF"
+        boton.width = 80
+        boton.disabled = False
+        boton.update()
+        
 
 
     def generar_aviso_cobro(self, e):
-            asyncio.run(generar_aviso_cobro(self, self.app, e))
+        boton = e.control
+
+        # Deshabilitar
+        boton.text = "Generando..."
+        boton.width = 120
+        boton.disabled = True
+        boton.update()
+        asyncio.run(generar_aviso_cobro(self, self.app, e))
+        boton.text = "PDF"
+        boton.width = 80
+        boton.disabled = False
+        boton.update()
 
     def generar_apremio_pdf_individual(self, e):
         self.tipo_doc = 1
@@ -305,10 +324,28 @@ class VistaApremio:
         asyncio.run(generar_primer_requerimiento_individual(self,self.app, e))
 
     def generar_apremio_pdf_2do(self, e):
+        boton = e.control
+        boton.text = "Generando..."
+        boton.width = 120
+        boton.disabled = True
+        boton.update()
         asyncio.run(generar_segundo_requerimiento(self,self.app, e))
+        boton.text = "PDF"
+        boton.width = 80
+        boton.disabled = False
+        boton.update()
 
     def generar_apremio_certificacion(self, e):
+        boton = e.control
+        boton.text = "Generando..."
+        boton.width = 120
+        boton.disabled = True
+        boton.update()
         asyncio.run(generar_certificacion(self, e))
+        boton.text = "PDF"
+        boton.width = 80
+        boton.disabled = False
+        boton.update()
 
     def consulta_identificacion(self, e):
         cod_aldea = self.cod_aldea.current.value

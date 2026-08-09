@@ -3,6 +3,8 @@ from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 from datetime import datetime
 
+from src.reports.utils.analisis_ingresos_utils import ajuste_automatico_columnas, formato_titulo_columna
+
 
 class TrancicionBIDetalleReport:
     def __init__(self,  municipio,  municipio_admin=False):
@@ -51,8 +53,7 @@ class TrancicionBIDetalleReport:
                 # -------------------------------------------------------
                 # 1️⃣ TÍTULO CENTRADO
                 # -------------------------------------------------------
-                ws.merge_cells(start_row=1, start_column=1,
-                               end_row=1, end_column=col_fin)
+                ws.merge_cells(start_row=1, start_column=1,end_row=1, end_column=col_fin)
                 celda_titulo = ws.cell(row=1, column=1)
                 celda_titulo.value = f"REPORTE {nombre_hoja.upper()}"
                 celda_titulo.font = Font(size=15, bold=True)
@@ -80,12 +81,16 @@ class TrancicionBIDetalleReport:
                 # -------------------------------------------------------
                 # 4️⃣ FORMATO DE ENCABEZADOS
                 # -------------------------------------------------------
-                for col in range(1, col_fin + 1):
-                    cell = ws.cell(row=5, column=col)
-                    cell.fill = header_fill
-                    cell.font = header_font
-                    cell.alignment = Alignment(horizontal="center")
-
+                fila_actual = 5  #Encabezados
+                ws.freeze_panes = "A6"
+                # ===============================
+                # ENCABEZADOS
+                # ===============================
+                columnas = []
+                for col in df:
+                    columnas.append(col,)
+                formato_titulo_columna(ws,columnas,fila_actual)
+                
                 # -------------------------------------------------------
                 # 5️⃣ BORDES PARA TODA LA TABLA
                 # -------------------------------------------------------
@@ -96,16 +101,7 @@ class TrancicionBIDetalleReport:
                 # -------------------------------------------------------
                 # 6️⃣ AUTOAJUSTE DE COLUMNAS
                 # -------------------------------------------------------
-                for col in ws.columns:
-                    max_length = 0
-                    col_letter = get_column_letter(col[0].column)
-
-                    for cell in col:
-                        if cell.value:
-                            max_length = max(max_length, len(str(cell.value)))
-
-                    ws.column_dimensions[col_letter].width = max(
-                        max_length + 2, 12)
+                ajuste_automatico_columnas(ws)
 
                 # -------------------------------------------------------
                 # 7️⃣ FILTROS AUTOMÁTICOS

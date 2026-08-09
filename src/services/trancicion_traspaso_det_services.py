@@ -6,9 +6,9 @@ from src.repositories.trancicion_amb_reposiory import TrancicionAMBRepository
 from src.repositories.trancicion_ps_reposiory import TrancicionSPRepository
 from src.repositories.aldea_repository import AldeaRepository
 from src.services.parametro_service import ParametroService
-from src.reports.trancicion_det_ics_report import TrancicionICSDetalleReport
-from src.reports.trancicion_det_sp_report import TrancicionSPDetalleReport
-from src.reports.trancicion_det_bi_report import TrancicionBIDetalleReport
+from src.reports.excel.trancicion_det_ics_report import TrancicionICSDetalleReport
+from src.reports.excel.trancicion_det_sp_report import TrancicionSPDetalleReport
+from src.reports.excel.trancicion_det_bi_report import TrancicionBIDetalleReport
 
 
 class TrancicionTraspasoDetalleService:

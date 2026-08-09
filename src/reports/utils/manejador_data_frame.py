@@ -13,8 +13,7 @@ def sumar_ingresos_departo_catastro(datos: DataFrame):
         "Inspeccion",
         "LotesCementerio"]].sum(axis=1)
 
-    datos["Otros"] = datos["TotalReciboPagado"].fillna(
-        0) - datos["Total_Resultado"].fillna(0)
+    datos["Otros"] = datos["TotalReciboPagado"].fillna(0) - datos["Total_Resultado"].fillna(0)
     datos["Nombre_Completo"] = (
         datos["Pnombre"].fillna('') + ' ' +
         datos["SNombre"].fillna('') + ' ' +

@@ -1,4 +1,4 @@
-from flet import ElevatedButton, ButtonStyle, TextStyle, Icons, BorderSide, RoundedRectangleBorder
+from flet import Alignment, Colors, ElevatedButton, ButtonStyle, TextStyle, Icons, BorderSide, RoundedRectangleBorder
 from src.ui.components.ui_colors import color_bg_2, color_borde, color_shadow, color_texto
 
 
@@ -103,6 +103,19 @@ def create_boton_aceptar(ancho=80) -> ElevatedButton:
     ),
     )
 
+def create_boton_editar(ancho=80) -> ElevatedButton:
+    return ElevatedButton("Editar", icon=Icons.EDIT_ATTRIBUTES, color=color_borde(),
+                          width=ancho,
+                          style=ButtonStyle(
+        side=BorderSide(2, color_borde()),
+        shape=RoundedRectangleBorder(
+            radius=18),
+        bgcolor=color_bg_2(),
+        shadow_color=color_shadow(),
+        text_style=TextStyle(
+            size=11, font_family="Tahoma", color=color_borde()),
+    ),
+    )
 
 def create_boton_guardar_modal() -> ElevatedButton:
     return ElevatedButton("Guardar", icon=Icons.SAVE_AS_OUTLINED, color=color_borde(),
@@ -147,3 +160,5 @@ def create_boton_eliminar() -> ElevatedButton:
                                   size=11, font_family="Tahoma", color=color_borde()),
     ),
     )
+
+

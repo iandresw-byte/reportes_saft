@@ -2,12 +2,12 @@ import os
 import webbrowser
 import flet as ft
 from src.models.tra_permop import Tra_PermOpe
-from src.reports.per_ope_tocoa import PermisoOperacionTocoaReport
+from src.reports.pfds.permisos_operacion.per_ope_tocoa import PermisoOperacionTocoaReport
 from src.services.parametro_service import ParametroService
 from src.services.permiso_operacion_services import PermisooperacionServices
-from src.reports.permiso_operacion_report import PermisoOperacionReport
-from src.reports.per_ope_la_esperanza import PerOpeLaEsperanzaReport
-from src.reports.per_ope_concepcion_report import PerOpeConcepcionReport
+from src.reports.pfds.permisos_operacion.permiso_operacion_report import PermisoOperacionReport
+from src.reports.pfds.permisos_operacion.per_ope_la_esperanza import PerOpeLaEsperanzaReport
+from src.reports.pfds.permisos_operacion.per_ope_concepcion_report import PerOpeConcepcionReport
 from src.ui.modals.venta_alcohol_modal import abril_venta_alcohol_modal
 from src.ui.components.ui_container import create_container
 from src.ui.components.ui_checkBox import createCheckBox

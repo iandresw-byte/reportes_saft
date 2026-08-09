@@ -31,3 +31,46 @@ WHERE        (F_03.ReciboAnulado = 0) AND (F_03.DNI = ?)
 GROUP BY F_03.NumRecibo, F_03.FechaRecibo, F_03.DNI
 ORDER BY F_03.DNI;
 """
+
+CONSULTA_DECLARACIONES_BIENES_INMUBLES = """
+
+DECLARE @dni as VARCHAR(50)=?
+SELECT        cast(SUM(F_02.ValorUnitAvPgDet) as Float) AS Impuesto, Ubicacion, 
+DATEPART(yyyy, F_01.FechaVenceAvPg) AS Periodo, F_01.AvPgEstado, FC_01.CatClv, FC_01.DNI, TablaBarrio.NombreBarrio
+FROM            F_02 INNER JOIN 
+F_01 ON F_02.NumAvPg = F_01.NumAvPg INNER JOIN 
+FC_01 ON F_02.ClaveCatastro = FC_01.CatClv INNER JOIN TablaBarrio ON FC_01.CodBarrio = TablaBarrio.CodBarrio
+WHERE        (F_01.DNI like @dni) AND (F_01.AvPgEstado <> 3) AND 
+(SUBSTRING(F_02.CtaIngreso, 1, 6) IN ('111110', '117201', '117202') OR  
+SUBSTRING(F_02.CtaIngreso, 1, 8) IN ('11729802', '11729801', '11212201')) 
+GROUP BY DATEPART(yyyy, F_01.FechaVenceAvPg), FC_01.CatClv, F_01.AvPgEstado,  Ubicacion,  FC_01.DNI,  TablaBarrio.NombreBarrio
+order by Periodo;
+"""
+CONSULTA_DECLARACIONES_INDUSTRIA_COMERCIO = """
+DECLARE @dni as VARCHAR(50)=?
+
+SELECT DeclaraContJurid.Identidad AS rtm, DeclaraContJurid.Periodo, 
+CAST(DeclaraContJurid.ProdNoReg +
+ DeclaraContJurid.ProdReg AS FLOAT) AS Gravable, 
+ CAST(DeclaraContJurid.ImpVolVenta AS FLOAT)as Impuesto , FC_03.IdRepresentante , TablaBarrio.NombreBarrio
+ FROM DeclaraContJurid INNER JOIN 
+ FC_03 ON DeclaraContJurid.Identidad = FC_03.DNI INNER JOIN TablaBarrio ON FC_03.CodBarrio = TablaBarrio.CodBarrio
+ WHERE (DeclaraContJurid.Identidad LIKE @dni) AND (DeclaraContJurid.EstadoDeclaraIC <> 2) OR 
+ (FC_03.IdRepresentante LIKE @dni) AND (DeclaraContJurid.EstadoDeclaraIC <> 2) 
+ ORDER BY DeclaraContJurid.Identidad, DeclaraContJurid.Periodo ;
+"""
+
+
+CONSULTA_CONTRIBUYENTE = """
+DECLARE @dni as VARCHAR(50)=?
+
+
+SELECT     *  FROM FC_03 WHERE DNI LIKE @dni;
+"""
+
+
+CONSULTA_TASAS = """
+DECLARE @anio as INTEGER=?
+
+SELECT PeriodoFact, RecargoAtrasoPago as TasaBIUrbana, TasaBIRural  From ParamRia WHERE (PeriodoFact = @anio);
+"""

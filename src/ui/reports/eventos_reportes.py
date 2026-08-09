@@ -6,7 +6,7 @@ from src.reports.pfds.rpt_abonados_x_servicio import RptAbonadosServicioReport
 from src.reports.excel.mora_abonados_sp import AbonadosServiciosExcelReport
 from src.reports.excel.mora_establecimientos import EstablecimientosExcelReport
 from src.reports.pfds.rpt_establecimientos_x_actividad import RptEstablecimientosActividadReport
-from src.reports.pfds.rpt_ingresos_depto_mensual import RptIngresosDeptoMensualReport
+from src.reports.pfds.ingresos.rpt_ingresos_depto_mensual import RptIngresosDeptoMensualReport
 from src.reports.excel.ingresos_depto_detallado_tributaria import IngresosDeptosDetalladosTributariaReport
 from src.reports.excel.ingresos_depto_detallado_justicia import IngresosDeptosDetalladosJusticiaReport
 from src.reports.excel.ingresos_depto_detallado_procamut import IngresosDeptosDetalladosProcamutReport
@@ -14,8 +14,8 @@ from src.reports.excel.ingresos_depto_detallado_urbanismo import IngresosDeptosD
 from src.reports.excel.ingresos_depto_detallado_secretaria import IngresosDeptosDetalladosSecretariaReport
 from src.reports.pfds.tarjeta_unica import TarjetaUnicaReport
 from src.reports.excel.ingresos_depto_diario import IngresosDeptosDiarioReport
-from src.reports.pfds.rpt_ingresos_depto_general import RptIngresosDeptoGeneralReport
-from src.reports.pfds.rpt_ingresos_depto_diario import RptIngresosDeptoDiarioReport
+from src.reports.pfds.ingresos.rpt_ingresos_depto_general import RptIngresosDeptoGeneralReport
+from src.reports.pfds.ingresos.rpt_ingresos_depto_diario import RptIngresosDeptoDiarioReport
 from src.reports.excel.rpt_pagos_bomberos import PagosBomberoReport
 from src.reports.excel.estratificacion_rpt import EstratificacionReport
 from src.reports.excel.estratificacion_sar import EstratificacionSARReport
@@ -23,12 +23,12 @@ from src.reports.excel.ingreso_deptos_rpt import IngresosDeptosReport
 from src.reports.excel.ingresos_deptos_detallado_rpt_uma import IngresosDeptosDetalladosUMAReport
 from src.reports.excel.ingresos_deptos_detallado_catastro_rpt import IngresosDeptosDetalladosCatastroReport
 from src.reports.excel.analisis_ingresos_rpt import AnalisisIngresosReport
-from src.reports.pfds.rpt_ingresos_depto_detallado import RptIngresosDeptoDetalladoReport
+from src.reports.pfds.ingresos.rpt_ingresos_depto_detallado import RptIngresosDeptoDetalladoReport
 from src.reports.mora_bi_aldea_anio_report import MoravsBIAldeaAnioReport
 from src.reports.reporte_permisos_operacion_report import RptPermisoOperacionReport
-from src.reports.mora_bi_report import MoraBIReport
+from src.reports.pfds.mora.mora_bi_report import MoraBIReport
 from src.reports.mora_ics_report import MoraICSReport
-from src.reports.mora_sp_report import MoraSPReport
+from src.reports.pfds.mora.mora_sp_report import MoraSPReport
 from src.reports.mora_vs_ingresos_aldea_report import MoravsIngresosAldeaReport
 from src.reports.trancicion_report import TrancicionReport
 from src.ui.reports.utils_reportes import (

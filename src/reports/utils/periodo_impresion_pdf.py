@@ -35,6 +35,12 @@ def dia_impresion_pdf(estilo):
         estilo,
     )
 
+def sub_titulo(estilo, titulo):
+    return Paragraph(
+        f"{titulo}",
+        estilo,
+    )
+
 
 def periodo_impresion_pdf_diario(fecha_ini, fecha_fin, cantidad_filas: int, estilo) -> Paragraph:
     if (isinstance(fecha_ini, tuple) and (len(fecha_ini) > 0)):

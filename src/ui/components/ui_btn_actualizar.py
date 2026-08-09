@@ -21,3 +21,24 @@ def create_update_button(page: Page, on_click=None):
             ), alignment=Alignment(0, 0)),
             on_click=on_click)
     )
+
+def actualizar_base_boton() -> ElevatedButton:
+    return ElevatedButton(
+        "Actualizar Base de Datos",
+        icon=Icons.REBASE_EDIT,
+        color=Colors.GREEN_700,
+        visible=True,
+        width=200,
+        height=35,
+        style=ButtonStyle(
+            side=BorderSide(2, Colors.GREEN_700),
+            bgcolor='#1b263b',
+            shadow_color=Colors.GREEN_700,
+            text_style=TextStyle(
+                    size=10,
+                    italic=False,
+                    font_family="Tahoma",
+                    color=Colors.GREEN_700,
+            ),
+            alignment=Alignment(0, 0),
+        ))

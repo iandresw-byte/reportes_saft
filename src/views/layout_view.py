@@ -209,7 +209,7 @@ class UILayout(ft.Container):
                     selected_icon=ft.Icon(
                         ft.Icons.SETTINGS_SUGGEST_ROUNDED, color=text_color, size=20),
                     label_content=ft.Text(
-                        "Ajustes PO", color=text_color, size=11, text_align=ft.TextAlign.CENTER),
+                        "Ajustes", color=text_color, size=11, text_align=ft.TextAlign.CENTER),
                     indicator_color=shadow_color,
                 ),
                 ft.NavigationRailDestination(

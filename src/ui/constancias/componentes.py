@@ -6,7 +6,7 @@ def botones_uma(vista):
     return ft.Column([
         ft.Row([
             create_boton_constancia(
-                "Licencia\nAmbiental", on_click=vista.abrir_licencia_ambiental_modal),
+                "Tasa\nAmbiental", on_click=vista.abrir_licencia_ambiental_modal),
 
         ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
     ],

@@ -5,7 +5,7 @@ import flet as ft
 from src.services.update_services import UpdateService  # type: ignore
 from src.views.splash_view import SplashView
 from src.views.login_view import PantallaLogin
-from src.views.updater_view import PantallaActualizacion
+from src.views.updater_view import PantallaActualizacion, PantallaActualizacionBD
 from src.contexts.app_context import AppContext
 from src.utils.logger_config import configurar_logger
 from src.utils.validar_version import validar_version
@@ -43,15 +43,29 @@ async def app(page: ft.Page):
 
     context = AppContext()
     context.init_services()
-    actualizador = UpdateService(page)
-    actualizado = actualizador.verificar_actualizacion_inicio(None)
+    context.init_app()
+    try:
+        #assert context.administracion_service is not None
+        #parametros = context.administracion_service.obtener_datos_municipalidad()
+        #if not  parametros["VersionDB"]:
+         #   print("Actualize base de datos")
 
-    page.clean()
+        actualizador = UpdateService(page)
+        actualizado = actualizador.verificar_actualizacion_inicio(context)
+    
+        page.clean()
+    
+        if not actualizado:
+            login = PantallaLogin(page, context, log)
+            page.add(await login.build())
+        else:
+            page.add(PantallaActualizacion(page, ))
+    
+        page.update()
+    except:
+        page.clean()
+        page.add(PantallaActualizacionBD(page, ))
+        page.update()
 
-    if not actualizado:
-        login = PantallaLogin(page, context, log)
-        page.add(await login.build())
-    else:
-        page.add(PantallaActualizacion(page, ))
-
-    page.update()
+    
+    

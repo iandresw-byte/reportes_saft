@@ -1,7 +1,7 @@
 import flet as ft
 
 
-def build_layout(titulo_tamanio, tipos_tamanio, titulo_firmas, contenedor_firmas,):
+def build_layout(titulo_tamanio, tipos_tamanio, titulo_firmas, contenedor_firmas,contenerdor_deptos):
 
     frame_tamanio_reporte = ft.Container(
         expand=True,
@@ -24,7 +24,8 @@ def build_layout(titulo_tamanio, tipos_tamanio, titulo_firmas, contenedor_firmas
             expand=True,
             controls=[
                 titulo_firmas,
-                contenedor_firmas
+                contenedor_firmas,
+                contenerdor_deptos
             ],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=20

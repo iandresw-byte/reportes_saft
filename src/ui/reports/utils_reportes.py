@@ -74,7 +74,7 @@ async def ejecutar_reporte(
             if tipo == "pdf":
                 reporte.generar_pdf(ruta)
             elif tipo == "excel":
-                ruta = reporte.generar_excel(nombre_archivo)
+                ruta = reporte.generar_excel(ruta)
 
             snack_final_reporte(vista.page, nombre_archivo, e)
             await asyncio.sleep(0.5)

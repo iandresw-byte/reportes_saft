@@ -10,7 +10,8 @@ from src.utils.config_manager import Config
 class AppContext:
     def __init__(self):
         self._conexion_saft = None
-
+        self._conexion_app = None
+        self._conexion_logging = None
         self._conexion_bitacora = None
         self._auth_service = None
         self._administracion_service = None
@@ -36,6 +37,14 @@ class AppContext:
             self._administracion_service = ParametroService(
                 self._conexion_saft)
 
+    def init_app(self):
+        if not self._conexion_app:
+            self._conexion_app = ConexionBD('SAFT', self.logger)
+            self._administracion_service = ParametroService(
+                self._conexion_app)
+
+    
+
     def init_bitacora(self):
         if not self._conexion_bitacora:
             self._conexion_bitacora = ConexionBD('SAFTBIT', self.logger)
@@ -44,6 +53,10 @@ class AppContext:
         self._conexion = ConexionBD('SAFT', self.logger)
         self._auth_service = UsuarioService(self._conexion )
         self._administracion_service = ParametroService(self._conexion_saft)
+
+    def initial_login(self):
+        if not self._conexion_logging:
+            self._conexion_logging = ConexionBD('logging', self.logger)
 
     @property
     def conexion_saft(self):
@@ -61,5 +74,8 @@ class AppContext:
     def administracion_service(self):
         return self._administracion_service
 
+    @property
+    def conexion_logging(self):
+        return self._conexion_logging
     
 

@@ -20,13 +20,22 @@ class ConstanciaRepository:
             columns = [column[0] for column in cur.description]
             return dict(zip(columns, row))
 
-    def insertar_licecia_uma_ics(self, NoLicencia, Periodo, Identidad, Propietario, rtm, Negocio, Ubicacion, NoRecibo, FechaSolicitud, FechaVence):
+    def insertar_tasa_uma_ics(self, NoLicencia, Periodo, Identidad, Propietario, rtm, Negocio, Ubicacion, NoRecibo, FechaSolicitud, FechaVence):
         query = """ INSERT INTO Tra_LiceAmbiental (NoLicencia, Periodo, Identidad, Propietario, rtm, Negocio, Ubicacion, NoRecibo, FechaSolicitud, FechaVence)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              """
         with self.conexion.cursor() as cur:
             cur.execute(query, (NoLicencia, Periodo, Identidad, Propietario,
                         rtm, Negocio, Ubicacion, NoRecibo, FechaSolicitud, FechaVence))
+
+    def update_tasa_uma_ics(self, NoLicencia, Periodo, Identidad, Propietario, rtm, Negocio, Ubicacion, NoRecibo, FechaSolicitud, FechaVence,IdPermiso):
+            query = """ UPDATE Tra_LiceAmbiental 
+                        SET NoLicencia = ?, Periodo= ?,Identidad= ?,Propietario= ?, rtm= ?, Negocio= ?, Ubicacion= ?, NoRecibo= ?, FechaSolicitud= ?, FechaVence= ?
+                        WHERE IdPermiso = ?
+                 """
+            with self.conexion.cursor() as cur: 
+                cur.execute(query, (NoLicencia, Periodo, Identidad, Propietario,
+                            rtm, Negocio, Ubicacion, NoRecibo, FechaSolicitud, FechaVence, IdPermiso))
 
     def existe_recibo(self, num_recibo: int) -> bool:
         query = "SELECT COUNT(*) as Total FROM Tra_LiceAmbiental WHERE NoRecibo = ?"

@@ -11,16 +11,22 @@ from reportlab.lib.pagesizes import letter
 from datetime import datetime
 from io import BytesIO
 from src.reports.pfds.apremio.crea_aviso import crear_aviso_carta
-from src.reports.utils.firmas_pdf import tabla_frima_admin_fima_recibido
+from src.reports.utils.firmas_pdf import firma_apremio_dos, firma_apremio_tres
 from src.reports.utils.logo_mun_pdf import logo_muni_imagen
 from src.reports.utils.tabla_titulo_pfd import titulo_horizontal, titulo_paragrap_pdf
 from src.ui.components.ui_style_table import estilos_parrafo
-
+from src.utils.config_manager import Config
+NUM_FIRMAS = Config.obtener("APREMIO", "NumFirmas")
+FIRMAS_1 = Config.obtener("APREMIO", "firma_1")
+FIRMAS_2 = Config.obtener("APREMIO", "firma_2")
+CARGO_1 = Config.obtener("APREMIO", "cargo_1")
+CARGO_2 = Config.obtener("APREMIO", "cargo_2")
 
 class ApremioCartaSAMIReport:
-    def __init__(self, lista_datos, municipio, titulo_reporte):
+    def __init__(self, lista_datos, municipio,administracion, titulo_reporte):
         self.lista_datos = lista_datos
         self.municipio = municipio
+        self.admin = administracion
         self.titulo = titulo_reporte
         self.num_requerimiento = "1er"
         self.margen = 0.70* cm
@@ -40,16 +46,24 @@ class ApremioCartaSAMIReport:
             BASE_DIR = r"C:\Users\iAndresw\RepositorioLocal\reportes_saft"
         
         logo_mun = logo_muni_imagen(ruta_base)
-        firma_admin = ''
+        firma_admin_1 = ''
+        firma_admin_2 = ''
         if self.municipio["CodMuni"] == "1807":
             DIR_FIRMA= os.path.join(BASE_DIR,  "assets", "images","firma_tributaria.png")
+            DIR_FIRMA_2= os.path.join(BASE_DIR,  "assets", "images","firma_alcalde.png")
             LOGO_MUN= os.path.join(BASE_DIR, "assets", "images","logo_olanchito.png")
             print(LOGO_MUN)
             
             if DIR_FIRMA:
-                firma_admin = Image(DIR_FIRMA, width=3*cm, height=2*cm)
+                firma_admin_1 = Image(DIR_FIRMA, width=3*cm, height=2*cm)
             else:
-                firma_admin = None
+                firma_admin_1 = None
+                
+            if DIR_FIRMA_2:
+                firma_admin_2 = Image(DIR_FIRMA_2, width=3*cm, height=2*cm)
+            else:
+                firma_admin_2 = None
+            logo_mun = Image(LOGO_MUN, width=1.20*cm, height=1.20*cm)
         titulo = titulo_paragrap_pdf(
             self.municipio, self.titulo, estilos["Title"])
         
@@ -132,8 +146,18 @@ class ApremioCartaSAMIReport:
             ]))
 
 
-            tabla_firma = tabla_frima_admin_fima_recibido("","Administracion Tributaria","",firma_admin)
-            
+            if NUM_FIRMAS == '1':
+                tabla_firma = firma_apremio_tres(
+                    self.admin[FIRMAS_1],
+                    CARGO_1,
+                    self.admin[FIRMAS_2],
+                    CARGO_2,
+                    firma_admin_1,
+                    firma_admin_2
+                    )
+            else:
+                tabla_firma = firma_apremio_dos(self.admin[FIRMAS_1],CARGO_1,firma_admin_1)
+                        
             elementos.append(tabla)
             elementos.append(Paragraph(texto_pie, estilos["Normal"]))
             elementos.append(Spacer(1, 1))

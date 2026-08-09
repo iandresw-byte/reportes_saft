@@ -33,6 +33,13 @@ class ConexionBD:
                 f"PWD={server_pass};",
                 autocommit=True
             )
+        elif self.tipo_bd == 'logging':
+            self.conexion = pyodbc.connect(
+                f"DSN=SAFTSQL;"
+                f"UID=ANDBE;"
+                f"PWD=ClaveX;",
+                autocommit=True
+            )
         else:
             self.log.error("Tipo de base de datos no válido", exc_info=True)
             raise ValueError(

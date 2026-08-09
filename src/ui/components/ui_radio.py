@@ -160,14 +160,13 @@ def rd_tipo_rubro_ics(tipo):
 
 
 
-def rd_numero_firmas(tipo_res:Ref|None):
+def rd_numero_firmas(value:str|None = '0', ref_num_firma:Ref|None = None)->RadioGroup:
     return RadioGroup(
-        ref=tipo_res,
-        value='0',
-        content=Column([
-            create_radio(value="1", label_text="1 Firma"),
-            create_radio(value="2", label_text="2 Firmas"),
-            create_radio(value="3", label_text="3 Firmas)"),
+        ref=ref_num_firma,
+        value=value,
+        content=Row([
+            create_radio(value="0", label_text="1 Firma"),
+            create_radio(value="1", label_text="2 Firmas"),
         ],)
     )
 

@@ -3,7 +3,81 @@ from src.reports.utils.manejador_establecimientos import sumar_establecimientos_
 from src.ui.components.ui_style_table import columa_style, fila_style, fila_style_descripcion, fila_style_moneda, fila_style_moneda_total, table_estyle_aviso_gob_media_carta, table_style_UMA
 
 
+ESTILO_ENCABEZADO_MORA = columa_style()
+ESTILO_FILA_MORA = fila_style()
+ESTILO_TABLA_MORA = table_estyle_aviso_gob_media_carta()
+ESTILO_FILA_MONEDA_TOTAL = fila_style_moneda_total()
+
+
 def tabla_aviso_mora_media_carta(datos) -> Table:
+
+
+
+    encabezado = [
+        Paragraph("No.", ESTILO_ENCABEZADO_MORA),
+        Paragraph("Descripción", ESTILO_ENCABEZADO_MORA),
+        Paragraph("Monto (L)", ESTILO_ENCABEZADO_MORA),
+    ]
+
+    filas_izq = [encabezado]
+    filas_der = [encabezado]
+
+    total = 0
+    filas_num = len(datos)
+    res = filas_num // 2
+
+    for contador, item in enumerate(datos, start=1):
+
+        monto = item["valor"] or 0
+        total += monto
+
+        fila = [
+            item["cta_ingreso"] or "",
+            item["nombre"] or "",
+            f"{monto:,.2f}",
+        ]
+
+        if contador <= res + 1:
+            filas_izq.append(fila)
+        else:
+            filas_der.append(fila)
+
+    # Completar la columna derecha si la izquierda tiene una fila adicional
+    if len(filas_izq) > len(filas_der) + 1:
+        filas_der.append(["",  "**ULTIMA LINEA**", "", ]) # type: ignore
+
+    # Total
+    filas_der.append([
+        "",
+        "TOTAL",
+        Paragraph(
+            f"{total:,.2f}",
+            ESTILO_FILA_MONEDA_TOTAL
+        ),
+    ])
+
+    # Crear las dos tablas
+    tabla_izq = Table(
+        filas_izq,
+        colWidths=[48, 172, 55]
+    )
+    tabla_izq.setStyle(ESTILO_TABLA_MORA)
+
+    tabla_der = Table(
+        filas_der,
+        colWidths=[48, 172, 55]
+    )
+    tabla_der.setStyle(ESTILO_TABLA_MORA)
+
+    # Tabla que contiene ambas
+    tabla = Table(
+        [[tabla_izq, tabla_der]],
+        colWidths=[279, 279]
+    )
+
+    return tabla
+
+def tabla_aviso_mora_media_carta_sami(datos) -> Table:
     estilo_encabezado = columa_style()
     estilo_fila = fila_style()
     estilo_fila_desc = fila_style_descripcion()
@@ -54,21 +128,19 @@ def tabla_aviso_mora_media_carta(datos) -> Table:
                 Paragraph("TOTAL", estilo_fila),
                 Paragraph(f"{total:,.2f}",estilo_fila_moneda_total),])
     
-    tabla_der = Table(filas_der, colWidths=[48, 172, 55])
+    tabla_der = Table(filas_der, colWidths=[50,172, 55])
     tabla_der.setStyle(estilo_tabla)
-    tabla_izq = Table(filas_izq, colWidths=[48, 172, 55])
+    tabla_izq = Table(filas_izq, colWidths=[50,172, 55])
     tabla_izq.setStyle(estilo_tabla)
 
     fila_group = [tabla_izq, tabla_der]
     tabla = Table(
         [fila_group],
-        colWidths=[ 279, 279],
+        colWidths=[ 280, 280],
     )
 
 
     return tabla
-
-
 
 def tabla_aviso_carta(datos) -> Table:
     estilo_encabezado = columa_style()
