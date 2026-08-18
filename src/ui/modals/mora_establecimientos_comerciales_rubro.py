@@ -24,6 +24,9 @@ def abrir_modal_establecimientos_comerciales_rubro(vista, e):
     cuentas = vista.cuentas_ics
     def handle_cuentas(e):
         cuenta = e.data
+        if cuenta == '%':
+            vista.cuenta_ics = '%'
+            return
         for row_cuenta in cuentas:
             if row_cuenta["CtaIngreso"] == cuenta:
                 vista.cuenta_ics = row_cuenta
@@ -34,18 +37,28 @@ def abrir_modal_establecimientos_comerciales_rubro(vista, e):
         tipo = e.data
         if tipo == "0":
             for cuenta in cuentas:
-                if cuenta["CtaIngreso"][0:6] == '117101':
+                if cuenta["CtaIngreso"][0:6] == '117101' or cuenta["CtaIngreso"][0:6] == '111112':
                     cuentas_seccionada.append(cuenta)
         elif tipo == "1":
             for cuenta in cuentas:
-                if cuenta["CtaIngreso"][0:6] == '117102':
+                if cuenta["CtaIngreso"][0:6] == '117102' or cuenta["CtaIngreso"][0:6] == '111113':
                     cuentas_seccionada.append(cuenta)
         elif tipo == "2":
             for cuenta in cuentas:
-                if cuenta["CtaIngreso"][0:6] == '117102':
+                if cuenta["CtaIngreso"][0:6] == '117103' or cuenta["CtaIngreso"][0:6] == '111114':
                     cuentas_seccionada.append(cuenta)
         else:
             cuentas_seccionada = cuentas
+
+        cuentas_seccionada.insert(0,
+                           {
+'CtaIngreso' :'%',
+'NombreCtaIngreso':'Todas',
+'CtaRecuperacion' :'',
+'CtaInteres':'',
+'CtaRecargos' :
+''})
+
         
         dropbox_cuentas_ics.options = [ft.dropdown.Option(
             data = a,

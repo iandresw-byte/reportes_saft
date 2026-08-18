@@ -1,5 +1,6 @@
 import flet as ft
 import os
+import time
 from src.views.permiso_operacion_view import VistaPermisoOperacion
 from src.views.about_view import VistaAbout
 from src.services.parametro_service import ParametroService
@@ -13,10 +14,26 @@ from src.ui.ajustes.vista_ajustes import VistaAjustesPO
 from src.ui.PagosIP.eventos import file_picker_result
 from src.ui.components.ui_colors import color_bg, color_bg_2, color_shadow, color_texto
 from src.ui.components.ui_container import create_container_rail
+import psutil
 
+
+_proceso = psutil.Process(os.getpid())
+_inicio = time.perf_counter()
+
+
+def medir_memoria(nombre):
+    memoria = _proceso.memory_info().rss / 1024 / 1024
+    tiempo = time.perf_counter() - _inicio
+
+    print(
+        f"[{tiempo:8.2f}s] "
+        f"{nombre:<35} "
+        f"RAM: {memoria:8.2f} MB"
+    )
 
 class UILayout(ft.Container):
     def __init__(self, page: ft.Page, context, logger):
+        medir_memoria("Inicio")
         super().__init__(expand=True)
         self._page = page
         page.update()
@@ -38,7 +55,7 @@ class UILayout(ft.Container):
         self._page.update()
         self.context = context
 
-        self.context.init_saft()
+        
 
         self._page.window.icon = "assets/images/icon.ico"
        
@@ -46,6 +63,8 @@ class UILayout(ft.Container):
         bg_color = color_bg()
         bg_2_color = color_bg_2()
         shadow_color = color_shadow()
+        medir_memoria("Después configuración Flet")
+        self.context.init_saft()
         self.context.datos_muni = self.context.administracion_service.obtener_datos_municipalidad()
         self.context.datos_admin = self.context.administracion_service.obtener_datos_municipalidad_admin()
         self.context.datos_system = self.context.administracion_service.obtener_datos_systema()
@@ -92,7 +111,7 @@ class UILayout(ft.Container):
             ),
             menu_position=ft.PopupMenuPosition.UNDER,
             bgcolor=color_bg_2())
-
+        medir_memoria("antes de las vitas")
     # --- Crear las vistas ---
         self.views = {
             "reportes": lambda: VistaReportes(self._page, self.context).build(),
@@ -113,7 +132,7 @@ class UILayout(ft.Container):
         user_po = self.user.validar_permiso("CT", "CkPo")
         user_pagos_empresa = self.user.validar_permiso("CT", "ChkDipe")
     # --- Función para cambiar vista según selección ---
-
+        medir_memoria("despues de las vitas")
         def on_nav_change(e):
             index = e.control.selected_index
 

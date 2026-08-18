@@ -83,14 +83,12 @@ class ConexionBD:
             self.conexion.rollback()  # type: ignore
             self.log.error(f"Rollback realizado en {e} {self.tipo_bd}")
             self.reconectar()
-
             raise
         except Exception as e:
             self.conexion.rollback()  # type: ignore
             self.log.error(f"Rollback realizado en {e} {self.tipo_bd}")
             raise e
         finally:
-            self.log.info(f"Conexión {self.tipo_bd} cerrada.")
             cur.close()
 
     def __enter__(self):

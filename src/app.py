@@ -8,10 +8,27 @@ from src.views.login_view import PantallaLogin
 from src.views.updater_view import PantallaActualizacion, PantallaActualizacionBD
 from src.contexts.app_context import AppContext
 from src.utils.logger_config import configurar_logger
-from src.utils.validar_version import validar_version
+import os
+import time
+import psutil
 
+
+_proceso = psutil.Process(os.getpid())
+_inicio = time.perf_counter()
+
+
+def medir_memoria(nombre):
+    memoria = _proceso.memory_info().rss / 1024 / 1024
+    tiempo = time.perf_counter() - _inicio
+
+    print(
+        f"[{tiempo:8.2f}s] "
+        f"{nombre:<35} "
+        f"RAM: {memoria:8.2f} MB"
+    )
 
 async def app(page: ft.Page):
+    medir_memoria("Inicio")
     x_width = 720
     x_height = 440
 
@@ -35,7 +52,7 @@ async def app(page: ft.Page):
 
     page.add(splash)
     page.update()
-
+    medir_memoria("Después configuración Flet")
     # Simula carga
     await asyncio.sleep(2)
 
@@ -44,6 +61,7 @@ async def app(page: ft.Page):
     context = AppContext()
     context.init_services()
     context.init_app()
+    medir_memoria("Después conexión SQL")
     try:
         #assert context.administracion_service is not None
         #parametros = context.administracion_service.obtener_datos_municipalidad()
@@ -62,6 +80,7 @@ async def app(page: ft.Page):
             page.add(PantallaActualizacion(page, ))
     
         page.update()
+        medir_memoria("Después crear interfaz")
     except:
         page.clean()
         page.add(PantallaActualizacionBD(page, ))

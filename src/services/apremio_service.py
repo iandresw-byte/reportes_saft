@@ -132,7 +132,7 @@ class ApremioService:
 
     def obtener_mora_gob(self, tipo_impuesto='%', tipo_persona="%", cod_aldea='%', cod_barrio='%', tipo_doc=1, num_requerimiento=10, mora_minima=0.0, fecha_min=None):
         self.data_ordenada = []
-        titulo_impuesto =get_tipo_impuesto(tipo_impuesto)
+        titulo_impuesto = get_tipo_impuesto(tipo_impuesto)
         if tipo_doc == 0:
             dato_apremio = self.repo.obtener_aviso(tipo_impuesto=tipo_impuesto,
                                                                tipo_persona=tipo_persona,
@@ -201,10 +201,9 @@ class ApremioService:
 
             if tipo_doc == 1 or tipo_doc == 0:
                 if tipo_imp == 1:
-                    self.insert_apremio_enc(
-                                    dato['ClavesCatastro'], tipo_imp, num_documeto,  dato['CodBarrio'], dato['total'],tipo_doc)
+                    self.insert_apremio_enc(dato['ClavesCatastro'], tipo_imp, num_documeto,  dato['CodBarrio'], dato['total'],tipo_doc)
                 else:
-                    self.insert_apremio_enc( dato['DNI'], tipo_imp, num_documeto,  dato['CodBarrio'], dato['total'],tipo_doc)
+                    self.insert_apremio_enc(dato['DNI'], tipo_imp, num_documeto,  dato['CodBarrio'], dato['total'],tipo_doc)
 
             elif tipo_doc == 2:
                 id_doc = mapa_ids.get(dato['DNI'])
@@ -231,9 +230,9 @@ class ApremioService:
                                     dato['ClavesCatastro'], tipo_imp, num_documeto,  dato['CodBarrio'], dato['total'])
                 else:
                     self.insert_apremio_enc( dato['DNI'], tipo_imp, num_documeto,  dato['CodBarrio'], dato['total'])
-
-            self.insert_factura(dato['DNI'], tipo_impuesto, num_documeto)
-            self.insert_apremio_detalle(dato['DNI'], tipo_imp, num_documeto)
+            if tipo_doc != 0:
+                self.insert_factura(dato['DNI'], tipo_impuesto, num_documeto)
+                self.insert_apremio_detalle(dato['DNI'], tipo_imp, num_documeto)
             self.data_ordenada.append(fila)
         # self.generar_pdf_apremio(titulo=titulo_impuesto)
         return self.data_ordenada

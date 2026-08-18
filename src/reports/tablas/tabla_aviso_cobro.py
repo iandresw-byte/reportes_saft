@@ -30,7 +30,7 @@ def tabla_aviso_mora_media_carta(datos) -> Table:
 
         monto = item["valor"] or 0
         total += monto
-
+        
         fila = [
             item["cta_ingreso"] or "",
             item["nombre"] or "",
@@ -96,6 +96,7 @@ def tabla_aviso_mora_media_carta_sami(datos) -> Table:
 
     for  item in datos:
         monto = item["valor"] or 0
+       
         contador+=1
         if contador<=res+1:
             filas_izq.append(
@@ -161,6 +162,7 @@ def tabla_aviso_carta(datos) -> Table:
 
     for  item in datos:
         monto = item["valor"] or 0
+
         contador+=1
         if contador<=res+1:
             filas_izq.append(

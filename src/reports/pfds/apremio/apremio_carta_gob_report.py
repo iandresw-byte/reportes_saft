@@ -77,6 +77,8 @@ class ApremioCartaGobReport:
         texto_pie = f"""En caso de no atender este requerimiento en el plazo indicado, se procederá con el procedimiento administrativo correspondiente."""
         texto_nota = """ Intereses y recargos calculados hasta la fecha de este documento. Los valores indicados en este documento son referenciales y pueden variar al momento del pago."""
         texto_fecha = f"Emitido a los {datetime.now().day} días del mes de {datetime.now().strftime('%B')} del año {datetime.now().year}"
+       
+
         for index, contribuyente in enumerate(self.lista_datos):
             contribuyente_qr = { 
                  "periodo":   contribuyente['periodo'],

@@ -36,7 +36,7 @@ async def generar_aviso_cobro(vista,app,  e,):
             )
         else:
             def reporte_apremio(datos): return ApremioOriginalCopiaGobReport(
-                datos, vista.datos_muni,vista.datos_muni_admin,  titulo_reporte
+                datos, vista.datos_muni,vista.datos_muni_admin,  titulo_reporte, True
             )
     elif app.tamanio_documento == "MediaCarta":
         if tipo_cta_sami:

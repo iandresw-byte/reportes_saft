@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import os
+import time
 import pandas as pd
 import flet as ft
 import webbrowser
@@ -39,6 +40,9 @@ async def ejecutar_reporte(
     construir_reporte=None,
     tipo="pdf",
 ):
+    tiempo_datos=0
+    tiempo_pdf=0
+    tiempo_excel=0
     if RESULTADO_DIR:
         carpeta_pdf = os.path.join(RESULTADO_DIR, tipo)
         os.makedirs(carpeta_pdf, exist_ok=True)
@@ -54,9 +58,9 @@ async def ejecutar_reporte(
         await asyncio.sleep(0.5)
 
         # 👇 función que retorna los datos
-
+        inicio = time.perf_counter()
         datos = obtener_datos()
-
+        tiempo_datos += time.perf_counter() - inicio
         if isinstance(datos, pd.DataFrame):
             is_data = len(datos) > 0
         elif isinstance(datos, list):
@@ -72,10 +76,14 @@ async def ejecutar_reporte(
 
         # 👇 genera el archivo correspondiente
             if tipo == "pdf":
+                inicio = time.perf_counter()
                 reporte.generar_pdf(ruta)
+                tiempo_pdf += time.perf_counter() - inicio
+                
             elif tipo == "excel":
+                inicio = time.perf_counter()
                 ruta = reporte.generar_excel(ruta)
-
+                tiempo_excel += time.perf_counter() - inicio
             snack_final_reporte(vista.page, nombre_archivo, e)
             await asyncio.sleep(0.5)
 
@@ -84,6 +92,10 @@ async def ejecutar_reporte(
                 webbrowser.open_new_tab(f"file://{ruta}")
             else:
                 os.startfile(ruta)
+
+            print(f"tiempo_datos:    {tiempo_datos:.2f} segundos")
+            print(f"tiempo_pdf:     {tiempo_pdf:.2f} segundos")
+            print(f"tiempo_excel:     {tiempo_excel:.2f} segundos")
         else:
             snack_error_reporte(vista.page, "Sin datos para mostarar")
 

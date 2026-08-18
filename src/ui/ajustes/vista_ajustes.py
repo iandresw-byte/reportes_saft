@@ -40,7 +40,7 @@ class VistaAjustesPO:
         self.botones = botones(self)
         self.contenedor_field_personal = create_container(self.filds_form)
         self.contenedor_radios = create_container(self.radios)
-
+        
         self.contenedor_botones = create_container(content=self.botones)
         self.file_picker = ft.FilePicker(
             on_result=lambda e: file_picker_result(self, e)

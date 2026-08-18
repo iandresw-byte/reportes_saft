@@ -103,7 +103,7 @@ def frima_estilo():
 def frima_estilo_aviso():
     return ParagraphStyle(
         name='Firma',
-        fontSize=8,
+        fontSize=7,
         fontName="Century-Gothic",
         alignment=1,  # justificado
     )

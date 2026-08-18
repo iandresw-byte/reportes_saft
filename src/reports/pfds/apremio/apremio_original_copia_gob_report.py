@@ -12,6 +12,7 @@ from reportlab.platypus import (
     Spacer,
     PageBreak,
 )
+import time
 from reportlab.lib import colors
 from reportlab.platypus import HRFlowable
 from reportlab.platypus import BaseDocTemplate
@@ -37,13 +38,14 @@ CARGO_1 = Config.obtener("APREMIO", "cargo_1")
 CARGO_2 = Config.obtener("APREMIO", "cargo_2")
 
 class ApremioOriginalCopiaGobReport:
-    def __init__(self, lista_datos, municipio,administracion, titulo_reporte):
+    def __init__(self, lista_datos, municipio,administracion, titulo_reporte, aviso = False):
         self.lista_datos = lista_datos
         self.municipio = municipio
         self.admin = administracion
         self.titulo = titulo_reporte
         self.num_requerimiento = "1er"
         self.margen = 0.4* cm
+        self.es_aviso = aviso
 
     def dibujar_linea(self, canvas, doc):
         """
@@ -143,12 +145,15 @@ class ApremioOriginalCopiaGobReport:
             logo_mun = Image(LOGO_MUN, width=1.20*cm, height=1.20*cm)
             
         estilo_personal = estilos_parrafo()
-        texto_parrafo = f"""Por este medio se le hace el {self.num_requerimiento} requerimiento de pago de los impuestos y servicios adeudados a esta municipalidad, a fin de que en el término de 30 días calendario, proceda a efectuar el pago del valor que se detalla a continuación"""
-        texto_pie = f"""En caso de no atender este requerimiento en el plazo indicado, se procederá con el procedimiento administrativo correspondiente."""
+        if not self.es_aviso:
+            texto_parrafo = f"""Por este medio se le hace el {self.num_requerimiento} requerimiento de pago de los impuestos y servicios adeudados a esta municipalidad, a fin de que en el término de 30 días calendario, proceda a efectuar el pago del valor que se detalla a continuación"""
+        else:
+            texto_parrafo = f"""Por este medio se le hace el aviso de pago de los impuestos y servicios adeudados a esta municipalidad, a fin de que en el término de 30 días calendario, proceda a efectuar el pago del valor que se detalla a continuación"""
+        #texto_pie = f"""En caso de no atender este requerimiento en el plazo indicado, se procederá con el procedimiento administrativo correspondiente."""
         texto_nota = """ Intereses y recargos calculados hasta la fecha de este documento. Los valores indicados en este documento son referenciales y pueden variar al momento del pago."""
         texto_fecha = f"Emitido a los {datetime.now().day} días del mes de {datetime.now().strftime('%B')} del año {datetime.now().year}"
         paragrap_texto_parrafo = Paragraph(texto_parrafo, estilos["Normal"])
-        paragrap_texto_pie = Paragraph(texto_pie, estilos["Normal"])
+        #paragrap_texto_pie = Paragraph(texto_pie, estilos["Normal"])
         paragrap_texto_nota = Paragraph(texto_nota, estilos["Normal"])
         paragrap_texto_fecha = Paragraph(texto_fecha, estilos["Normal"])
 
@@ -169,54 +174,60 @@ class ApremioOriginalCopiaGobReport:
                 )
         else:
             tabla_firma = firma_apremio_dos(self.admin[FIRMAS_1],CARGO_1,firma_admin_1)
-        
+        tabla_titulo = titulo_mudia_carta(titulo, muni_titulo, logo_mun, None)
+        tiempo_aviso = 0
+        tiempo_mora = 0
+          
         for index, contribuyente in enumerate(self.lista_datos):
-            contribuyente_qr = { 
-                 "periodo":   contribuyente['periodo'],
-                 "nombre":   contribuyente['nombre'],
-                 "dni":   contribuyente['dni'],
-                 "direccion":   contribuyente['direccion'],
-                 "clave_catastro":   contribuyente['clave_catastro'],
-                 "num_documeto":   contribuyente['num_documeto']}
-            qr_img = qrcode.make(contribuyente_qr)
-            buffer = BytesIO()
-            qr_img.save(buffer, format="PNG")
-            buffer.seek(0)
-            qr_flowable = Image(buffer, width=1.20*cm, height=1.20*cm)
-            tabla_titulo = titulo_mudia_carta(titulo, muni_titulo, logo_mun, qr_flowable)
+            # contribuyente_qr = { 
+            #      "periodo":   contribuyente['periodo'],
+            #      "nombre":   contribuyente['nombre'],
+            #      "dni":   contribuyente['dni'],
+            #      "direccion":   contribuyente['direccion'],
+            #      "clave_catastro":   contribuyente['clave_catastro'],
+            #      "num_documeto":   contribuyente['num_documeto']}
+            # qr_img = qrcode.make(contribuyente_qr)
+            # buffer = BytesIO()
+            # qr_img.save(buffer, format="PNG")
+            # buffer.seek(0)
+            # qr_flowable = Image(buffer, width=1.20*cm, height=1.20*cm)
+            inicio = time.perf_counter()
             encabezado = crear_aviso(self, contribuyente, "ORIGINAL")
-        
+            tiempo_aviso += time.perf_counter() - inicio
+            inicio = time.perf_counter()
             tabla_duo = tabla_aviso_mora_media_carta(contribuyente["mora"])
-            
+            tiempo_mora += time.perf_counter() - inicio
             elementos.append(tabla_titulo)
-            elementos.append(Spacer(1, 5))
+            elementos.append(Spacer(1, 3))
             elementos.extend(encabezado)
-            elementos.append(Spacer(1, 2))
+            elementos.append(Spacer(1, 1))
             elementos.append(paragrap_texto_parrafo)
-            elementos.append(Spacer(1, 2))
+            elementos.append(Spacer(1, 1))
             elementos.append(tabla_duo)
-            elementos.append(Spacer(1, 2))
-            elementos.append(paragrap_texto_pie)
+            elementos.append(Spacer(1, 1))
+            #elementos.append(paragrap_texto_pie)
             elementos.append(paragrap_texto_nota)
             elementos.append(paragrap_texto_fecha)
-            elementos.append(Spacer(1, 18))
+            elementos.append(Spacer(1, 16))
             elementos.append(tabla_firma)
-            elementos.append(cc_original)
+            #elementos.append(cc_original)
             elementos.append(FrameBreak())
             elementos.append(tabla_titulo)
-            elementos.append(Spacer(1, 5))
+            elementos.append(Spacer(1, 3))
             elementos.extend(encabezado)
-            elementos.append(Spacer(1, 2))
+            elementos.append(Spacer(1, 1))
             elementos.append(paragrap_texto_parrafo)
-            elementos.append(Spacer(1, 2))
+            elementos.append(Spacer(1, 1))
             elementos.append(tabla_duo)
             elementos.append(Spacer(1, 2))
-            elementos.append(paragrap_texto_pie)
+            #elementos.append(paragrap_texto_pie)
             elementos.append(paragrap_texto_nota)
             elementos.append(paragrap_texto_fecha)
-            elementos.append(Spacer(1, 18))
+            elementos.append(Spacer(1, 16))
             elementos.append(tabla_firma)
-            elementos.append(cc_copia)
+            #elementos.append(cc_copia)
             if index < len(self.lista_datos) - 1:
                 elementos.append(PageBreak())
+        print(f"Aviso:    {tiempo_aviso:.2f} segundos")
+        print(f"Mora:     {tiempo_mora:.2f} segundos")
         doc.build(elementos)

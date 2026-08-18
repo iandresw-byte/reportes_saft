@@ -168,15 +168,15 @@ def firma_apremio_dos(nombre_1: str, cargo_1: str, img_firma_1, nombre_2 = "Reci
        "",
     ]
 
-    valores_fila_2 = [
-        "",
-        Paragraph(cargo_1, ESTILOS_F1),
-        "",
-        Paragraph(cargo_2, ESTILOS_F1),
-        "",
-    ]
+    #valores_fila_2 = [
+    #    "",
+    #    Paragraph(cargo_1, ESTILOS_F1),
+    #    "",
+    #    Paragraph(cargo_2, ESTILOS_F1),
+    #    "",
+    #]
     tabla_firma = Table(
-                [image_firma,valores_fila,valores_fila_2],
+                [image_firma,valores_fila],
                 colWidths=[50, 200, 50, 200, 50],
             )
 

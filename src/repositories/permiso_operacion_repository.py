@@ -13,7 +13,7 @@ class PermisoOperacionReposirory:
 
     def recargar_datos(self, num_recibo: int):
         query = """
-            SELECT Tra_PermOP.NumRecibo, Tra_PermOP.Identidad, Tra_PermOP.NoPermiso,  FC_03.Direccion,  FC_03.IdRepresentante, Tra_PermOP.Periodo, Tra_PermOP.Negocio, Tra_PermOP.Propietario,
+            SELECT Tra_PermOP.NumRecibo, Tra_PermOP.DNI AS iDENTIDAD , Tra_PermOP.NoPermiso,  FC_03.Direccion,  FC_03.IdRepresentante, Tra_PermOP.Periodo, Tra_PermOP.Negocio, Tra_PermOP.Propietario,
                 Tra_PermOP.Ubicacion, Tra_PermOP.Actividad, Tra_PermOP.Usuario, Tra_PermOP.FirmaJ , Tra_PermOP.UsuarioMod, FC_03.CodProfesion, FC_03.FechaNac, FC_03.ClaveCatastro, Tra_PermOP.Observacion,
                 FC_03.rtn, Tra_PermOP.CodAldea, FC_03.idrepresentante , FC_03.Telefono , Tra_PermOP.Fecha,  Tra_PermOP.HorarioAlcohol
             FROM Tra_PermOP INNER JOIN 

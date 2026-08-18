@@ -35,7 +35,6 @@ class CuentaIngresoRepository:
             columns = [column[0] for column in cur.description]
             return dict(zip(columns, row))
 
-
     def obtener_lista_cuentas_tipo_impuesto(self, tipo:int):
             query = """
 
@@ -50,6 +49,30 @@ class CuentaIngresoRepository:
                     GROUP BY CtaRecuperacion))
                     GROUP BY CtaIngreso, NombreCtaIngreso, CtaRecuperacion, CtaInteres, CtaRecargos
                     ORDER BY CtaIngreso
+            """
+            with self.conexion.cursor() as cur:
+                cur.execute(query, (tipo))
+                rows = cur.fetchall()
+                columns = [column[0] for column in cur.description]
+
+                resultado = []
+                for i, row in enumerate(rows, start=1):
+                    registro = dict(zip(columns, row))
+                    registro["Fila"] = i
+                    resultado.append(registro)
+
+                return resultado
+
+
+    def obtener_lista_cuenta_mayor_mora(self, tipo:int|None):
+            query = """
+                SELECT        SUBSTRING(F_02.CtaIngreso, 1, 6) AS cta_Ingreso, CatalogoIngreso.Descripcion
+                FROM            F_02 INNER JOIN
+                CatalogoIngreso ON SUBSTRING(F_02.CtaIngreso, 1, 6) = CatalogoIngreso.CtaIngreso INNER JOIN
+                F_01 ON F_02.NumAvPg = F_01.NumAvPg
+                WHERE        (F_01.AvPgEstado = 1) AND (F_01.AvPgTipoImpuesto = 1)
+                GROUP BY SUBSTRING(F_02.CtaIngreso, 1, 6), CatalogoIngreso.Descripcion
+                ORDER BY cta_Ingreso
             """
             with self.conexion.cursor() as cur:
                 cur.execute(query, (tipo))

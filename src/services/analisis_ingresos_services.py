@@ -1,5 +1,6 @@
 import pandas as pd
 from src.repositories.analisis_ingresos_repository import AnalisisIngresosRepository
+from core.reports.analisis_ingresos import analisi_ingresos
 from src.services.parametro_service import ParametroService
 
 
@@ -10,11 +11,15 @@ class AnalisisIngresosService:
         self.sys = sistem
 
     def analisis_ingresos_anio_act_anio_ant(self, anio: int):
-        data = self.reposicion.analisis_ingresos_anio_act_anio_ant(anio)
+        anio = anio
+        anio_ante = int(anio)-1
+        data = analisi_ingresos(anio_actual=anio, anio_anterior=anio_ante,fecha_inicio= f"{anio_ante}-01-01",fecha_fin=f"{anio}-31-12")
         if not data:
             raise ValueError(
                 "No se encontraron datos de mora general de aldeas (respuesta vacía).")
         try:
+            print(data)
+            print(type(data))
             df = pd.DataFrame(data)
             df = self.sumar_analisis_data_frame(df, anio=int(anio)-1, anio_fin=int(anio))
         except Exception as e:
